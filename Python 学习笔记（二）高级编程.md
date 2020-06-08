@@ -342,9 +342,401 @@ ls
 
 ## 解析语法与条件表达
 
+### 解析语法
+
+#### 引例：多维列表赋值问题的解决
+
+* 可以使用如下的方式对多维列表进行赋值：
+
+```python
+ls = [ [0]*10 for i in range(5) ]
+ls
+"""
+[[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+"""
+
+ls[0][0] = 1
+ls
+"""
+[[1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+ [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+"""
+```
+
+* 上述创建列表的方式有点类似于用一个for循环进行创建。循环一共执行5次，每一次都创建一个独立的含10个元素的空列表，最后将其合并形成二维列表。
+* 上例中的创建语句被称之为"列表解析语句"。
+
+#### 解析语法的基本结构 —— 以列表解析为例
+
+* 列表解析也称为列表推导，两者不加区分。
+
+* 下面是列表解析的基本结构：
+
+    [ expression **for value in iterable** if condition ]
+
+* 可以用**三要素**法来记忆：表达式（expression）、可迭代对象（iterable）、if 条件（可选）。
+
+* 下面重点介绍该语句的执行过程：
+
+    (1)  从**可迭代对象**中拿出一个元素。
+
+    (2)  通过 **if 条件** (如果有的话)，对元素进行筛选：
+
+    ​      若通过筛选，则把元素传递给**表达式**；
+
+    ​      若未通过，则进入 (1) 步骤，进入下一次迭代。
+
+    (3)  将传递给**表达式**的元素，代入**表达式**进行处理，产生一个结果。
+
+    (4)  将 (3) 步产生的结果作为列表的一个元素进行存储。
+
+    (5)  重复 (1) ~ (4) 步骤，直至迭代对象迭代结束，返回新创建的列表。
+
+* 如果觉得上述步骤有点过于繁琐，那么我们可以用以下的代码进行等价：
+
+```python
+# 等价代码，不可直接执行，需要对语句进行填充
+result = []
+for value in iterable:
+    if condition:
+        result.append(expression)
+```
+
+* 举个例子，比如我们要求20以内奇数的平方：
+
+```python
+result = []
+for i in range(20):
+    if i % 2 == 1:
+        result.append( i**2 )
+result # [1, 9, 25, 49, 81, 121, 169, 225, 289, 361]
+```
+
+* 如果用列表解析来表示，可以用如下的语句：
+
+```python
+result = [ i**2 for i in range(20) if i % 2 == 1 ]
+result # [1, 9, 25, 49, 81, 121, 169, 225, 289, 361]
+```
+
+* 这样创建既简洁又容易理解，而且运行起来比一般的代码要更快。
+
+#### 解析语法的其他机制
+
+* value 支持多变量
+    * 可以同时用两个变量对两个列表进行打包的遍历方法。
+
+```python
+x = [1, 2, 3]
+y = [4, 5, 6]
+
+result = [ i*j for i,j in zip(x,y) ] # 多变量以元组的形式传递
+result # [4, 10, 18]
+```
+
+* 支持循环嵌套
+    * 可以在一个循环中嵌套另一个循环，构造所有的排列组合。
+
+```python
+colors = ['black', 'white']
+sizes = ['S', 'M', 'L']
+tshirts = [ '{}{}'.format(color, size) for color in colors for size in sizes ]
+tshirts # ['blackS', 'blackM', 'blackL', 'whiteS', 'whiteM', 'whiteL']
+```
+
+#### 字典和集合的解析语法
+
+* 解析语法构造字典（字典推导）
+
+```python
+squares = {i: i**2 for i in range(10)}
+squares # {0: 0, 1: 1, 2: 4, 3: 9, 4: 16, 5: 25, 6: 36, 7: 49, 8: 64, 9: 81}
+```
+
+* 解析语法构造集合（集合推导）
+
+```python
+squares = {i**2 for i in range(10)}
+squares # {0, 1, 4, 9, 16, 25, 36, 49, 64, 81}
+```
+
+* 突发奇想：如果两端使用小括号"()"会怎么样？
+
+```python
+squares = (i**2 for i in range(10))
+squares # <generator object <genexpr> at 0x107613db0>
+```
+
+* 这个奇奇怪怪的东西叫做"生成器"。可以用它来进行遍历。我们将在下一章提到它。
+* 给一个小例子吧：
+
+```python
+colors = ['black', 'white']
+sizes = ['S', 'M', 'L']
+tshirts = ( '{}{}'.format(color, size) for color in colors for size in sizes )
+for tshirt in tshirts:
+    print(tshirt, end=" ")   
+# blackS blackM blackL whiteS whiteM whiteL 
+```
 
 
 
+### 条件表达
+
+#### 条件表达的基本结构
+
+* 下面是条件表达式的基本结构：
+
+    expression1  if  condition  else  expression2
+
+* 如果还原成等价的代码应该是这样的：
+
+```python
+# 等价代码，不可直接执行，需要对语句进行填充
+if condition:
+    expression1
+else:
+    expression2
+```
+
+* 下面举一个简单的例子：
+    * 取n的绝对值给x
+
+```python
+# 正常的写法
+n = -10
+if n >= 0:
+    x = n
+else:
+    x = -n
+    
+# 条件表达式写法
+x = n if n >= 0 else -n
+```
+
+* 条件表达式让条件变得更加的简洁，其运行速度也会更快。是一种经常使用的语法格式。
+
+
+
+## 生成器、迭代器、装饰器
+
+### 生成器
+
+#### 引例：为什么需要生成器
+
+* 假如我们需要1000000以内的平方项，那么直观的想法是用以下方式实现：
+
+```python
+ls = [i**2 for i in range(1000000)]
+```
+
+* 这样做会生成一个列表，虽然可以供我们随时取用，但是这个列表过长，占用了太大的内存空间，而且我们也不一定会同时用到所有的结果。
+* 当我们需要复杂结果的时候，与其生成一个大列表存储，我们也可以考虑仅在需要时才进行计算。生成器就是为了解决这样的问题。
+
+#### 生成器的特点
+
+* 采用惰性计算的方式；
+* 无需一次性存储海量数据；
+* 一边执行一边计算，只计算每次需要的值；
+* 实际上一直在执行 next() 操作，直到无值可取。
+
+#### 生成器的基本写法
+
+* 生成器表达式：
+
+    * 请看下面的例子：
+        * squares 就是一个生成器，它仅仅在后面的 for 循环执行的时候才进行计算
+
+    ```python
+    squares = (i**2 for i in range(1000000))
+    for i in squares:
+        pass # 对结果执行相关操作
+    ```
+
+    * 下面是一个求1加到100的和的生成器计算法：
+
+    ```python
+    sum( (i for i in range(1, 101)) ) # 5050
+    ```
+
+    * 这样我们并不需要把0～100全部写出来就能够直接计算他们的和。
+
+* 生成器函数—— `yield ` 生成斐波那契数列的例子：
+
+    * 假如我们要生成斐波那契数列的一些项，可以这么做：
+
+    ```python
+    def fib(n):
+        ls = []
+        i, a, b = 0, 1, 1
+        while i < n:
+            ls.append(a)
+            a, b = b, a+b
+            n += 1
+           
+    fib(10) 
+    ```
+
+    * 但是如果我们不希望用列表把他们存起来，怎么办呢：
+
+    ```python
+    def fib(n):
+        i, a, b = 0, 1, 1
+        while i < n:
+            yield a # 生成器函数
+            a, b = b, a+b
+            n += 1
+           
+    for a in fib(10):
+        print(a, end = ' ')
+        
+    # 
+    ```
+
+    * 通过yield函数会自动生成迭代器。其运行原理是这样的：
+
+        (1)  每次访问生成器的时候都会执行这个函数，当函数执行到 yield 语句时返回，返回值就是 yield 后面的那个变量的值（可以把 yield 看成是 return ）。
+
+        (2)  当下一次访问生成器时，程序就会从上一次 yield 返回的地方开始继续执行，直到再次遇到 yield 返回。如此往复。
+
+        (3)  当函数到达终点正常返回时，生成器也就完成了其使命。
+
+    * 这样，我们就可以做到不使用列表，而在每次需要时才计算的功能。
+
+
+
+
+### 迭代器
+
+#### 可迭代对象 Iterable
+
+* 可直接用于for循环的对象统称为可迭代对象。
+
+    * 如何判断某个对象是否可迭代？ 
+
+    ```python
+    from collections import Iterable # 记得导入！
+    
+    isinstance([1, 2, 3], Iterable) # True
+    ```
+
+    * 可以用上面的方法进行判断。导入Iterable，然后通过isinstance来判断。
+
+* 列表、元组、字符串、字典、集合、文件都是可迭代对象。
+* 生成器也是可迭代对象。
+    * 生成器不仅仅是for循环使用，也可以用 next() 函数进行调用。
+    * 当无值可取时，会抛出StopIteration异常。
+
+```python
+squares = (i**2 for i in range(10))
+isinstance(squares, Iterable) # True
+
+next(squares) # 0
+next(squares) # 1
+next(squares) # 4
+```
+
+
+
+#### 迭代器 Iterator
+
+* 可以被 next() 函数调用并不断返回下一个值，直到无值可取时返回StopIteration异常的对象，称为迭代器。
+* 显然，生成器也是迭代器。但列表、元组、字符串、集合、字典都不是迭代器。
+* 如何判断迭代器？
+
+```python
+from collections import Iterator
+
+isinstance([1, 2, 3], Iterator) # False
+```
+
+* 可以通过 iter() 函数创建迭代器：
+
+```python
+isinstance(iter([1, 2, 3]), Iterator) # True
+```
+
+* 因此 for item in Iterable 等价于：
+    * 先通过 iter() 函数获取可迭代对象Iterable的迭代器；
+    * 然后对获取到的迭代器不断调用 next() 方法来获取下一个值，将其赋值给 item；
+    * 当遇到 StopIteration 异常时循环结束。
+* zip、enumerate 等 itertools 里的函数都是迭代器：
+    * 我们复习一下他们的用法：
+
+```python
+x = [1, 2]
+y = ['a', 'b']
+isinstance(zip(x, y), Iterator) # True
+
+for i in zip(x, y):
+    print(i)
+    
+"""
+(1, 'a')
+(2, 'b')
+"""
+```
+
+```python
+numbers = [1, 2, 3, 4, 5]
+isinstance(enumerate(numbers), Iterator) # True
+for i in enumerate(numbers): # 将位置信息和值构成元组输出
+    print(i)
+    
+"""
+(0, 1)
+(1, 2)
+(2, 3)
+(3, 4)
+(4, 5)
+"""
+```
+
+* 文件是迭代器：
+
+```python
+with open('测试文件.txt', 'r', encoding = 'utf-8') as f: # 要有这个文件
+    print(isinstance(f, Iterator)) # True
+```
+
+* 迭代器是可耗尽的：
+
+```python
+squares = (i**2 for i in range(5))
+for square in squares:
+    print(square, end = " ") # 0 1 4 9 16 
+    
+for square in squares:
+    print(square, end = " ") # 无输出，迭代器耗尽。
+```
+
+* range() 不是迭代器
+    * range() 有长度、可索引、可存在运算、不可被 next() 调用、且不会被耗尽。
+
+```python
+numbers = range(10)
+isinstance(numbers, Iterator) # False
+```
+
+* 可以认为range是一个懒序列。
+    * 它是一种序列，但并不包含任何内存中的内容，而是通过计算来回答问题。
+
+
+
+### 装饰器
+
+#### 需求
+
+* 需要对已开发的上线的程序添加某些功能
+* 不能对程序中函数的源代码进行修改
+* 不能改变程序中函数的调用方式
 
 
 
