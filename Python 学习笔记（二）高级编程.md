@@ -738,5 +738,412 @@ isinstance(numbers, Iterator) # False
 * 不能对程序中函数的源代码进行修改
 * 不能改变程序中函数的调用方式
 
+* 装饰器就完成了上述功能。
 
+#### 基本概念：函数对象、高阶函数、嵌套函数、闭包
 
+函数是python中的一类对象。
+
+* 可以把函数赋值给变量；
+* 可以对该变量进行调用，可实现函数的功能。
+
+```python
+def square(x):
+    return x**2
+
+print(type(square)) # <class 'function'> square 是function类的一个实例
+```
+
+```python
+pow_2 = square  # 把函数赋值给变量，可以理解成给函数起了一个别名pow_2
+print(pow_2(5)) # 25
+print(square(5)) # 25
+```
+
+* 高阶函数：接受函数作为参数 或者 返回一个函数 称为高阶函数。
+    * 举一个例子：
+
+```python
+def square(x):
+    return x**2
+
+def pow_2(fun):
+    return fun
+
+f = pow_2(square) # pow_2函数返回square 等价于 f = square.
+f(8) # 64
+```
+
+* 嵌套函数：在函数内部嵌套一个函数
+
+```python
+def outer():
+    print('outer is running!')
+    
+    def inner():
+        print('inner is running!')
+        
+    inner()
+
+outer()
+"""
+outer is running!
+inner is running!
+"""
+```
+
+* 闭包：可以用以下几个定义来理解：
+    * 延伸了作用域的函数；
+    * 如果一个函数定义在另一个函数的作用域内，并且引用了外层函数的变量，则称该函数为闭包；
+    * 闭包是由函数及其相关的引用环境组合而成的实体（即：闭包 = 函数 + 引用环境）
+    * 我们用以下的例子来说明：
+
+```python
+def outer():
+    x = 1
+    z = 10
+    
+    def inner():
+        y = x + 100 # 使用了外部函数的x
+        return y, z # 使用了外部函数的z
+    
+    return inner
+
+f = outer() # 包含了内部函数和外层函数的信息
+print(f) # <function outer.<locals>.inner at 0x7f9010225a60>
+
+print(f.__closure__) # __closure__ 属性中包含了来自外部函数的信息
+for i in f.__closure__: 
+    print(i.cell_contents) # 1 10 利用 cell_contents 函数看看存了什么
+    
+print(f()) # (101, 10)
+```
+
+* 一旦在内层函数重新定义了相同名字的变量，则该变量会成为局部变量
+
+```python
+def outer():
+    x = 1
+    
+    def inner():
+        x = x + 100
+        return x
+    
+    return inner
+
+f = outer()
+f() # 报错，inner函数中没有定义x
+```
+
+* 使用 nonlocal 允许内嵌函数修改闭包变量：
+
+```python 
+def outer():
+    x = 1
+    
+    def inner():
+        nonlocal x
+        x = x + 100
+        return x
+    
+    return inner
+
+f = outer()
+f() # 101
+```
+
+#### 装饰器
+
+* 现在给出一个装饰器的小例子：
+
+```python
+import time
+
+def f1():
+    print('f1 run')
+    time.sleep(1)
+    
+f1() # 需要给 f1() 函数增加计时功能
+```
+
+```python
+import time
+
+def timer(func):
+    
+    def inner():
+        print("inner run")
+        start = time.time()
+        func()
+        end = time.time()
+        print("{} 函数运行用时 {:.2f} s".format(func.__name__, (end - start)))
+       
+    return inner
+
+def f1():
+    print('f1 run')
+    time.sleep(1)
+    
+f1 = timer(f1) # 给f1添加timer()环境
+f1()
+"""
+inner run
+f1 run
+f1 函数运行用时 1.00 s
+"""
+```
+
+* 上述方法用了闭包的原理，在不更改f1函数名的情况下，修改了f1的内容。
+
+* 需要注意的是，这里的 f1 已经不是原来的 f1 了，我们通过这种“偷换概念”的方式实现了装饰器的功能。
+
+    * 但是这样写有点直白，影响了代码的美观，因此python引入了一个语法糖的功能：
+
+    ```python
+    import time
+    
+    def timer(func):
+        
+        def inner():
+            print("inner run")
+            start = time.time()
+            func()
+            end = time.time()
+            print("{} 函数运行用时 {:.2f} s".format(func.__name__, (end - start)))
+           
+        return inner
+    
+    @timer   # 相当于实现了 f1 = timer(f1)
+    def f1():
+        print('f1 run')
+        time.sleep(1)
+        
+    f1()
+    ```
+
+* 以上就完成了基本装饰函数的介绍。
+
+#### 深入讨论装饰器
+
+* 继续深入讨论，如何**装饰有参函数**呢？
+
+```python
+import time
+
+def timer(func):
+    
+    def inner(*args, **kwargs): # 设置参数列表
+        print("inner run")
+        start = time.time()
+        func(*args, **kwargs) # 将上述参数传递给func函数进行运行即可
+        end = time.time()
+        print("{} 函数运行用时 {:.2f} s".format(func.__name__, (end - start)))
+       
+    return inner
+
+@timer
+def f1(n):
+    print('f1 run')
+    time.sleep(n)
+
+f1(4)
+"""
+inner run
+f1 run
+f1 函数运行用时 4.00 s
+"""
+```
+
+* 如果被装饰函数**有返回值**怎么办呢？
+
+```python
+import time
+
+def timer(func):
+    
+    def inner(*args, **kwargs):
+        print("inner run")
+        start = time.time()
+        res = func(*args, **kwargs) # 增添返回值
+        end = time.time()
+        print("{} 函数运行用时 {:.2f} s".format(func.__name__, (end - start)))
+        return res # 返回res
+       
+    return inner
+
+@timer
+def f1(n):
+    print('f1 run')
+    time.sleep(n)
+    return "wake up"
+    
+f1(4)
+"""
+inner run
+f1 run
+f1 函数运行用时 4.00 s
+'wake up'
+"""
+```
+
+* 如何处理**带参数的装饰器**呢？
+    * 装饰器本身要传递一些额外参数。
+    * 需求：有时需要统计绝对时间，有时需要统计绝对时间的2倍。
+
+```python
+def timer(method):
+    
+    def outer(func):
+        
+        def inner(*args, **kwargs):
+            print("inner run")
+            if method == "origin":
+                print("origin_inner run")
+                start = time.time()
+                res = func(*args, **kwargs)
+                end = time.time()
+                print("{} 函数运行用时 {:.2f} s".format(func.__name__, (end - start)))
+            elif method == "double":
+                print("double_inner run")
+                start = time.time()
+                res = func(*args, **kwargs)
+                end = time.time()
+                print("{} 函数运行双倍用时 {:.2f} s".format(func.__name__,2*(end - start)))
+            return res
+        
+        return inner
+    
+    return outer
+
+@timer(method='origin')
+def f1():
+    print('f1 run')
+    time.sleep(1)
+    
+@timer(method='double')
+def f2():
+    print('f2 run')
+    time.sleep(1)
+    
+f1()
+print()
+f2()
+"""
+inner run
+origin_inner run
+f1 run
+f1 函数运行用时 1.00 s
+
+inner run
+double_inner run
+f2 run
+f2 函数运行双倍用时 2.01 s
+"""
+```
+
+#### 细节问题
+
+* 装饰器何时执行？
+    * 一装饰就执行，无需调用
+
+```python
+func_names = []
+def find_function(func):
+    print('run')
+    func_names.append(func)
+    return func
+
+@find_function
+def f1():
+    print("f1 run")
+    
+@find_function
+def f2():
+    print("f2 run")
+    
+@find_function
+def f3():
+    print("f3 run")
+    
+"""
+此时运行，将会输出：
+run
+run
+run
+"""
+for fun in func_names:
+    print(fun.__name__)
+    fun()
+    print()
+"""
+f1
+f1 run
+
+f2
+f2 run
+
+f3
+f3 run
+
+"""
+```
+
+* 第一个输出结果可以看出，装饰器被调用了3次。因此才会输出3个run，进而说明装饰器一装饰就会执行。
+* 第二个结果可以进一步看出这些函数已经加入了func_name变量中。可以接受调用。
+
+* 回归本源：
+
+    * 原函数的属性被掩盖了
+
+    ```python
+    import time
+    
+    def timer(func):
+        
+        def inner():
+            print("inner run")
+            start = time.time()
+            func()
+            end = time.time()
+            print("{} 函数运行用时 {:.2f} s".format(func.__name__, (end - start)))
+           
+        return inner
+    
+    @timer   # 相当于实现了 f1 = timer(f1)
+    def f1():
+        print('f1 run')
+        time.sleep(1)
+        
+    print(f1.__name__) # inner
+    ```
+
+    * 这说明 f1 的函数名还是 inner 并不是f1。这样还是有一些不完美。
+
+* wraps函数
+
+    * wraps函数就很好的解决了这个问题，它骗过了电脑，使得最终显示的名字还是 f1。
+
+```python
+import time
+from functools import wraps
+
+def timer(func):
+    @wraps(func)
+    def inner():
+        print("inner run")
+        start = time.time()
+        func()
+        end = time.time()
+        print("{} 函数运行用时 {:.2f} s".format(func.__name__, (end - start)))
+       
+    return inner
+
+@timer   # 相当于实现了 f1 = timer(f1)
+def f1():
+    print('f1 run')
+    time.sleep(1)
+    
+print(f1.__name__) # f1
+```
+
+* 至此我们就完美解决了装饰器问题。
