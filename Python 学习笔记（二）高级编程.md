@@ -1147,3 +1147,141 @@ print(f1.__name__) # f1
 ```
 
 * 至此我们就完美解决了装饰器问题。
+
+
+
+## 面向对象的编程简介
+
+### 类与对象
+
+* python的语法中包含了很多面向对象的内容，学过一定编程知识的同学应该清楚面向对象的重要性。所以如果没有学过面向对象的建议先看一些书稍微了解一下。因此本部分内容实在是有点难讲，我可能也不会讲的特别清楚，大家尽量以了解语法为主，面向对象的思想的理解是需要一定的经验和积淀的。
+
+#### 一切皆为对象
+
+对象包括这样几个特点：
+
+* 所有的客观世界的事物都可以看成是一个对象。
+* 每个对象都有其内在属性。（属性）
+* 每个对象对外会表现出其一定的行为。（方法）
+
+类是对象的载体，把一类对象的公共特征抽象出来，就是一个通用类。
+
+* python可以通过如下的方法创建类：
+
+```python
+class Cat():
+    def __init__(self, name): # 类的属性初始化
+        self.name = name # 属性为名字
+        
+    def jump(self): # 模拟猫的跳跃
+        print(self.name + ' is jumping')
+```
+
+* 用类创建实例：
+
+```python
+my_cat = Cat('Lucky')
+your_cat = Cat('Winner')
+```
+
+* 查看属性：
+
+```python
+print(my_cat.name) # Lucky
+print(your_cat.name) # Winner
+```
+
+* 调用方法：
+
+```python
+my_cat.jump() # Lucky is jumping
+your_cat.jump() # Winner is jumping
+```
+
+#### 类的组成
+
+* 命名：
+    * 一般首字母大写。
+    * 要有实际意义。
+    * 一般采用驼峰命名法：CreditCard、ElectricCar
+* 格式：
+
+```python
+# class 类名
+"""类前空两行"""
+
+
+class Car():
+    """对该类的简单介绍"""
+    pass
+
+"""类后空两行"""
+```
+
+* 属性：
+
+    * 属性可以理解为类内部的变量。仅仅在类的内部使用，用于存储对象的数据和一些特征。
+    * 下面是属性的格式。注意传递的参数第一个一定要有 self 。因为初始化参数是要给类的属性赋值，而 self 指代的是该类的对象，如果没有这个参数就无法给属性传参，使用时就会出错。
+
+    ```python
+    def __init__(self, 要传递的参数):
+    ```
+
+* 方法：
+
+    * 类可以定义一些方法以供使用，需要注意的是类的方法必须要传入self变量。
+    * 但是在使用对象调用该方法的时候不需要传入self。
+
+* 下面将刚刚的几个要素应用到下面的例子中。
+
+    * 这个例子我们后面会继续使用。
+
+
+```python
+class Car():
+    """模拟汽车"""
+    
+    def __init__(self, brand, model, year):
+        """初始化汽车属性"""
+        self.brand = brand # 品牌
+        self.model = model # 型号
+        self.year = year # 出厂年份
+        self.mileage = 0 # 里程初始化
+        
+    def get_main_information(self):
+        """获取汽车主要信息"""
+        print("品牌：{}   型号：{}   出厂年份：{}".format(self.brand, self.model,
+                                                      self.year))
+    def get_mileage(self):
+        """获取总公里数"""
+        print("行车总里程：{}公里".format(self.mileage))
+```
+
+
+
+### 实例
+
+#### 创建
+
+* 将实例赋值给对象，实例化的过程需要传入对应的参数（如果有默认参数，也可以使用默认参数）
+* 创建的对象名 = 类名（必要的初始化参数）
+
+```python
+my_new_car = Car('Audi', 'A6', 2018)
+```
+
+#### 访问属性
+
+```python
+print(my_new_car.brand) # Audi
+print(my_new_car.model) # A6
+print(my_new_car.year)  # 2018
+```
+
+#### 调用方法
+
+```python
+my_new_car.get_main_information() # 品牌：Audi   型号：A6   出厂年份：2018
+my_new_car.get_mileage() # 行车总里程：0公里
+```
+
