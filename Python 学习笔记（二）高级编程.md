@@ -1272,6 +1272,8 @@ my_new_car = Car('Audi', 'A6', 2018)
 
 #### 访问属性
 
+* 实例名.属性名
+
 ```python
 print(my_new_car.brand) # Audi
 print(my_new_car.model) # A6
@@ -1280,8 +1282,364 @@ print(my_new_car.year)  # 2018
 
 #### 调用方法
 
+* 实例名.方法名(必要的参数)
+
 ```python
 my_new_car.get_main_information() # 品牌：Audi   型号：A6   出厂年份：2018
 my_new_car.get_mileage() # 行车总里程：0公里
 ```
+
+#### 修改属性
+
+* 直接修改
+
+```python
+my_old_car = Car("BYD", '宋', 2016)
+print(my_old_car.mileage) # 0
+my_old_car.mileage = 12000 # 修改属性
+print(my_old_car.mileage) # 12000
+my_old_car.get_mileage() # 行车总里程：12000公里
+```
+
+* 通过方法修改属性
+    * 重新定义上述类，增加设置总公里数的方法
+
+```python
+class Car():
+    """模拟汽车"""
+    
+    def __init__(self, brand, model, year):
+        """初始化汽车属性"""
+        self.brand = brand # 品牌
+        self.model = model # 型号
+        self.year = year # 出厂年份
+        self.mileage = 0 # 里程初始化
+        
+    def get_main_information(self):
+        """获取汽车主要信息"""
+        print("品牌：{}   型号：{}   出厂年份：{}".format(self.brand, self.model,
+                                                      self.year))
+    def get_mileage(self):
+        """获取总公里数"""
+        print("行车总里程：{}公里".format(self.mileage))
+        
+    def set_mileage(self, distance): # 增加设置总公里数的方法
+        """设置总公里数"""
+        self.mileage = distance
+```
+
+```python
+my_old_car = Car('BYD', '宋', 2016)
+my_old_car.get_mileage() # 行车总里程：0公里
+my_old_car.set_mileage(8000)
+my_old_car.get_mileage() # 行车总里程：8000公里
+```
+
+#### 拓展功能
+
+* 禁止设置负里程
+* 将每次的里程数累加。
+
+```python
+class Car():
+    """模拟汽车"""
+    
+    def __init__(self, brand, model, year):
+        """初始化汽车属性"""
+        self.brand = brand # 品牌
+        self.model = model # 型号
+        self.year = year # 出厂年份
+        self.mileage = 0 # 里程初始化
+        
+    def get_main_information(self):
+        """获取汽车主要信息"""
+        print("品牌：{}   型号：{}   出厂年份：{}".format(self.brand, self.model,
+                                                      self.year))
+    def get_mileage(self):
+        """获取总公里数"""
+        print("行车总里程：{}公里".format(self.mileage))
+        
+    def set_mileage(self, distance): # 增加设置总公里数的方法
+        """设置总公里数"""
+        if distance >= 0:
+            self.mileage += distance # 累加
+        else:
+            print("里程数不能为负！") # 禁止设置负里程
+```
+
+```python
+my_old_car = Car('BYD', '宋', 2016)
+my_old_car.get_mileage() # 行车总里程：0公里
+my_old_car.set_mileage(-8000) # 里程数不能为负！
+my_old_car.get_mileage() # 行车总里程：0公里
+my_old_car.set_mileage(200)
+my_old_car.set_mileage(1000)
+my_old_car.get_mileage() # 行车总里程：1200公里
+```
+
+* 一个类包含很大的信息量，实现高度的拟人（物）化。
+    * 原课程中这句话有点笼统，也不太准确。笔者认为，类存在的意义是实现面向对象的设计，以及对物体特性的抽象表达。类在一定程度上沟通了现实世界与抽象代码之间的桥梁，但学习时一定要注意，**并不是所有的类都是为了沟通桥梁而建立的。**所以学习面向对象最重要的是：
+        * 充分理解做这一特性的目的。
+        * 记忆实现这一特性的语法。
+
+
+
+### 继承特性
+
+* 继承是从底层向高层抽象的过程。父类将公共特征抽取出来建立类，各子类建立各自的特征，构建各自的类。也可以修改父类中的方法。
+
+#### 简单继承
+
+* 父类：
+
+```python
+class Car():
+    """模拟汽车"""
+    
+    def __init__(self, brand, model, year):
+        """初始化汽车属性"""
+        self.brand = brand # 品牌
+        self.model = model # 型号
+        self.year = year # 出厂年份
+        self.mileage = 0 # 里程初始化
+        
+    def get_main_information(self):
+        """获取汽车主要信息"""
+        print("品牌：{}   型号：{}   出厂年份：{}".format(self.brand, self.model,
+                                                      self.year))
+    def get_mileage(self):
+        """获取总公里数"""
+        print("行车总里程：{}公里".format(self.mileage))
+        
+    def set_mileage(self, distance): # 增加设置总公里数的方法
+        """设置总公里数"""
+        if distance >= 0:
+            self.mileage += distance # 累加
+        else:
+            print("里程数不能为负！") # 禁止设置负里程
+```
+
+* 子类：
+    * class 子类名（父类名）：
+    * 新建一个电动汽车类：
+
+```python
+class ElectricCar(Car):
+    """模拟电动汽车"""
+    
+    def __init__(self, brand, model, year): # 覆写父类的__init__方法
+        super().__init__(brand, model, year) # super()表示调用父类方法
+```
+
+* 子类对象可以直接使用父类的所有方法：
+
+```python
+my_electric_car = ElectricCar('NextWeek', 'FF91', 2046)
+my_electric_car.get_main_information() # 品牌：NextWeek   型号：FF91   出厂年份：2046
+```
+
+* 现在子类对象和父类是完全一致的。
+
+#### 添加属性和方法
+
+```python
+class ElectricCar(Car):
+    """模拟电动汽车"""
+    
+    def __init__(self, brand, model, year, bettery_size):
+        """初始化电动汽车属性"""
+        super().__init__(brand, model, year)    # 声明继承父类的属性
+        self.bettery_size = bettery_size        # 电池容量
+        self.electric_quantity = bettery_size   # 电池剩余电量
+        self.electric2distance_ratio = 5        # 电量距离换算系数 5公里/kW.h
+        self.remainder_range = self.electric_quantity*self.electric2distance_ratio 
+        # 剩余可行驶里程
+    
+    def get_electric_quantity(self):
+        """查看当前电池电量"""
+        print("当前电池剩余电量：{} kW.h".format(self.electric_quantity))
+        
+    def set_electric_quantity(self, electric_quantity):
+        """设置电池剩余电量，重新计算电量可支撑行驶里程"""
+        if electric_quantity >= 0 and electric_quantity <= self.bettery_size:
+            self.electric_quantity = electric_quantity
+            self.remainder_range = self.electric_quantity*self.electric2distance_ratio
+        else:
+            print("电量未设置在合理范围！")
+    
+    def get_remainder_range(self):
+        """查看剩余可行驶里程"""
+        print("当前电量还可以继续驾驶 {} 公里".format(self.remainder_range))              
+```
+
+* 接下来创建一个实例：
+
+```python
+my_electric_car = ElectricCar("NextWeek", "FF91", 2046, 70)
+my_electric_car.get_electric_quantity()           # 当前电池剩余电量：70 kW.h
+my_electric_car.get_remainder_range()             # 当前电量还可以继续驾驶 350 公里
+```
+
+* 尝试调整部分参数：
+
+```python
+my_electric_car.set_electric_quantity(50)         # 重设电池电量
+my_electric_car.get_electric_quantity()           # 当前电池剩余电量：50 kW.h
+my_electric_car.get_remainder_range()             # 当前电量还可以继续驾驶 250 公里
+```
+
+#### 重写父类的方法
+
+* 原课程中将这一部分与多态特性进行了同时比较，而且代码中并没有使用到面向对象的多态特性。所以这里我们分开进行说明。
+* 父类方法的重写（或称覆盖、覆写、重新定义，一个意思，英文是override）是继承特性的一部分，指的是该子类对原父类已定义的方法进行了一些修改，这是为了提升程序的复用性，针对每个子类的不同特性修改适合这个子类的函数。
+* 请看下面的例子：
+
+```python
+class ElectricCar(Car):
+    """模拟电动汽车"""
+    
+    def __init__(self, brand, model, year, bettery_size):
+        """初始化电动汽车属性"""
+        super().__init__(brand, model, year)    # 声明继承父类的属性
+        self.bettery_size = bettery_size        # 电池容量
+        self.electric_quantity = bettery_size   # 电池剩余电量
+        self.electric2distance_ratio = 5        # 电量距离换算系数 5公里/kW.h
+        self.remainder_range = self.electric_quantity*self.electric2distance_ratio 
+        # 剩余可行驶里程
+    
+    def get_main_information(self):        # 重写父类方法
+        """获取汽车主要信息"""
+        print("品牌：{}   型号：{}   出厂年份：{}   续航里程：{} 公里"
+              .format(self.brand, self.model,
+                      self.year,self.bettery_size*self.electric2distance_ratio))
+    
+    def get_electric_quantit(self):
+        """查看当前电池电量，重新计算电量可支撑行驶里程"""
+        print("当前电池剩余电量：{} kW.h".format(self.electric_quantity))
+        
+    def set_electric_quantity(self, electric_quantity):
+        """设置电池剩余电量"""
+        if electric_quantity >= 0 and electric_quantity <= self.bettery_size:
+            self.electric_quantity = electric_quantity
+            self.remainder_range = self.electric_quantity*self.electric2distance_ratio
+        else:
+            print("电量未设置在合理范围！")
+    
+    def get_remainder_range(self):
+        """查看剩余可行驶里程"""
+        print("当前电量还可以继续驾驶 {} 公里".format(self.remainder_range))
+```
+
+* 这个例子中，函数 get_main_information 重写了父类中的同名方法，补充了续航里程的输出。这样定义以后，我们就可以在子类对象中使用父类方法了。
+
+```python
+my_electric_car = ElectricCar("NextWeek", "FF91", 2046, 70)
+my_electric_car.get_main_information() 
+# 品牌：NextWeek   型号：FF91   出厂年份：2046   续航里程：350 公里
+```
+
+
+
+### 多态特性
+
+* 多态特性其实说明起来是比较复杂的。那么我们还是使用一个例子来说明。
+
+#### 引子
+
+```python
+class Student():
+    """学生类"""
+    
+    def __init__(self, name, school, grade):
+        self.name = name
+        self.school = school
+        self.grade = grade
+    def get_profile(self):
+        return "我是{}，来自{}，{}年级了".format(self.name, self.school, self.grade)
+    
+def print_profile(student):
+    """打印学生档案"""
+    print(student.get_profile())
+```
+
+* 假设我们有上述的学生类，并且写好了一个得到自我介绍（get_profile）的方法。此外我们还写了一个全局函数print_profile()，这个函数接受Student类的对象，并且通过调用get_profile方法将自我介绍打印出来。
+* 那么就可以写出如下的例子：
+
+```python
+print_profile(Student('小红', '第一中学', 1))
+# 我是小红，来自第一中学，1年级了
+```
+
+* 上述例子中，创建了一个Student对象，并且赋值给print_profile类。这样可以得到理想的结果。
+
+#### 子类
+
+* 如果我们此时需要添加具体的小学生、中学生、大学生三个子类，并且对get_profile函数修改，该怎么办呢？
+
+```python
+class PrimarySchoolStudent(Student):
+    """初中生类"""
+    
+    def __init__(self, name, school, grade, hobby):
+        super().__init__(name, school, grade)
+        self.hobby = hobby
+    def get_profile(self):
+        return "我是{}，来自{}，{}年级了，我喜欢{}".format(self.name, self.school,
+                                                    self.grade, self.hobby)
+        
+        
+class HighSchoolStudent(Student):
+    """高中生类"""
+    
+    def __init__(self, name, school, grade, ability):
+        super().__init__(name, school, grade)
+        self.ability = ability
+    def get_profile(self):
+        return "我是{}，来自{}，{}年级了，我擅长{}".format(self.name, self.school,
+                                                    self.grade, self.ability)
+
+        
+class CollegeStudent(Student):
+    """大学生类"""
+    
+    def __init__(self, name, school, grade, certificate):
+        super().__init__(name, school, grade)
+        self.certificate = certificate
+    def get_profile(self):
+        return "我是{}，来自{}，{}年级了，我有{}的技能证书".format(self.name, self.school,
+                                                    self.grade, self.certificate)
+```
+
+* 现在我们添加了这三个子类。可以看出，每个子类中自我介绍的语句都是不同的。现在我们用相同的方法给子类调用print_profile函数，结果会怎么样呢？
+
+```python
+s1 = PrimarySchoolStudent('小明', '第五小学', 5, '读书')
+print_profile(s1)
+# 我是小明，来自第五小学，5年级了，我喜欢读书
+
+s2 = HighSchoolStudent('小雪', '第二中学', 2, '钢琴')
+print_profile(s2)
+# 我是小雪，来自第二中学，2年级了，我擅长钢琴
+
+s3 = CollegeStudent('小龙', '清华大学', 3, '六级')
+print_profile(s3)
+# 我是小龙，来自清华大学，3年级了，我有六级的技能证书
+```
+
+* 可以看出，我们这里虽然没有改动原来调用父类的函数 print_profile，却能够直接实现用这一函数打印子类的功能。下面我们做深入讨论。
+
+#### 讨论总结
+
+* 上面的例子展现了如下的功能：当我们写完一个父类方法以及调用该父类对象的函数时，如果我们从父类继承出一个或多个子类，那么调用父类的方法也同样可以接受子类对象作为参数，并且会正确地调用复写过的子类方法来实现相关功能。
+* 这其实是几乎所有面向对象语言表现出的特性：多态特性。字面理解，"多种形态"，即一个变量可以接受多种形态的赋值，既可以称为一个父类对象，也可以称为一个子类对象。而且，多态的特性保证了方法的调用是非常**智能化**的，它会根据自身正确的子类类型帮我们去判断需要调用哪个子类的方法，而不需要我们显示地给出。
+* 还是以刚刚的例子来说，我们并没有事先告诉print_profile函数，“我要传入一个子类了，请你做好准备，记得调用子类的方法哦，不要调用错了”。多态直接保证了这一步骤的实现。它清晰地判断了子类的类型，然后根据这一特征实现对应的算法。
+
+* 当然你可能会觉得，这很正常啊，毕竟你事先给s1、s2、s3赋值过，系统已经知道他们的数据类型了，自然会产生正确的结果啊。但是，这样的多态特性使得我们的代码复用能力和扩展性大大提高。
+* 再举一个简单的例子。比如我们有一个项目的开源代码，该项目本来写好了一个输入数据类，但是我们这时候需要修改成我们所需要的那个输入数据类，此时我们就可以选择定义一个子类，然后复写原代码中的输入方法，这样在系统执行时就会自动调用这一子类的代码进行操作，而不会理会原代码了。从这一角度，多态特性确保了代码的可扩展能力。
+
+* 可能说的有些啰嗦哈，但是希望能听懂。面向对象还有很多特性，我们先就介绍到这里吧。
+
+
+
+
 
