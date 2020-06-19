@@ -1785,7 +1785,7 @@ with open("写入文件测试.txt", 'w', encoding = 'utf-8') as f:
 这是写入的第二行
 """
 with open("写入文件测试.txt", 'w', encoding = 'utf-8') as f:
-    f.write('这是写入的第三行\n')  # 重新打开会覆盖原文件！
+    f.write('这是写入的第三行\n')  # 重新打开会覆盖原文件！意思是如果重新执行这段代码结果是一样的。
     f.write('这是写入的第四行\n')
     
 """
@@ -1802,8 +1802,14 @@ with open("写入文件测试.txt", 'w', encoding = 'utf-8') as f:
 
 ```python
 with open("写入文件测试.txt", 'a', encoding = 'utf-8') as f:
-    f.write('这是写入的第三行\n')  # 重新打开会覆盖原文件！
+    f.write('这是写入的第三行\n') 
     f.write('这是写入的第四行\n')
+"""
+文件内容：
+[ 原文本 ]
+这是写入的第三行
+这是写入的第四行
+"""
 ```
 
 * 将元素是字符串的列表整体写入文件——f.writelines()
@@ -1814,6 +1820,16 @@ ls = ['第一行', '第二行', '第三行', '第四行']
 with open("写入文件测试.txt", 'a', encoding = 'utf-8') as f:
     f.writelines(ls) # 这种写法的结果会堆在一起。
     f.writelines([_ + '\n' for _ in ls]) # 这样就可以换行了
+    
+"""
+第一种方法的文件内容：
+第一行第二行第三行第四行
+第二种方法的文件内容 ：
+第一行
+第二行
+第三行
+第四行
+"""
 ```
 
 #### 文件既读又写
@@ -1825,8 +1841,16 @@ with open("写入文件测试.txt", 'a', encoding = 'utf-8') as f:
 ```python
 with open('test.txt', 'r+', encoding = 'gbk') as f:
     f.seek(0, 2) # 文件指针移动函数。第一个参数是偏移量，第二个参数是位置（0：文件开头；1：文件当前位置；2：文件结尾）
+    			 # 如果不把文件指针定位到文件结尾，写入时文件会对原内容进行覆盖。
     text = ['增添第一行\n', '增添第二行\n']
     f.writelines(text)
+
+"""
+文件内容是：
+增添第一行
+增添第二行
+[ 原文本 ]
+"""
 ```
 
 * 'w+'
@@ -1835,7 +1859,7 @@ with open('test.txt', 'r+', encoding = 'gbk') as f:
 
 ```python
 with open('test.txt', 'w+', encoding = 'gbk') as f:
-    pass # 这样也会清空
+    pass # 这样也会清空原文件内容
 ```
 
 * 'a+'
@@ -1847,11 +1871,256 @@ with open('test.txt', 'w+', encoding = 'gbk') as f:
 with open('test.txt', 'r+', encoding = 'gbk') as f:
     text = ['增添第一行\n', '增添第二行\n']
     f.writelines(text)
-    f.seek(0, 0)
-    print(f.read())
+    f.seek(0, 0) # 将指针移到文件开头
+    print(f.read()) # 打印所有行
+    
+"""
+文件内容是：
+[ 原文本 ]
+增添第一行
+增添第二行
+"""
 ```
 
 
 
+### 数据文件的存储与读取
+
+* 本节主要介绍两种数据存储文件格式，csv和json
+
+#### csv 格式
+
+* csv 是一种通过**逗号**将数据分开的字符序列，可以通过 excel 打开
+* 读取
+
+```python
+with open('成绩.csv', 'r', encoding='gbk') as f:
+    ls = []
+    for line in f: # 逐行读取法
+        ls.append(line.strip('\n').split(',')) # strip函数可以去掉每行两侧的换行符；split函数将结果按逗号进行分割 
+        
+for res in ls:
+    print(res) # 按行输出结果
+```
+
+* 写入
+
+```python
+ls = [['编号', '数学成绩', '语文成绩'], ['1', '100', '98'], 
+      ['2', '96', '99'], ['3', '97', '95']]
+with open('成绩.csv', 'w', encoding='gbk') as f: # 使用utf-8中文容易出现乱码
+    for row in ls:
+        f.write(','.join(row) + '\n') # 逗号组合成字符串，后加换行符
+```
+
+* 在模块部分将介绍csv模块的读取操作
+
+#### json 格式
+
+* json 格式常被用于存储字典类型数据。
+* 写入——dump()
+
+```python
+import json
+
+scores = {'Petter':{'math':96, 'physics':98},
+          'Paul':{'math':92, 'physics':99},
+          'Mary':{'math':98, 'physics':97} }
+with open('score.json', 'w', encoding = 'utf-8') as f:
+    json.dump(scores, f, indent=4, ensure_ascii=False)
+    # indent 是一个换行缩进设置，在存储时设置缩进可以使预览更美观；
+    # ensure_ascii 在字典中没有中文时设置为False，如果有中文则设置为True
+```
+
+* 读取——load()
+
+```python
+with open('score.json', 'r', encoding='utf-8') as f:
+    scores = json.load(f) # 读取字典
+    for k, v in scores.items(): # 遍历键值
+        print(k, v)
+```
 
 
+
+## 异常处理
+
+### 常见异常
+
+* 下面列举了一些常见异常。但是实际应用中的异常还远不止这些。
+
+#### 除0运算——ZeroDivisionError
+
+```python
+1/0 # 运行后会产生一个除零异常
+```
+
+#### 找不到可读文件——FileNotFoundError
+
+```python
+with open('nobody.csv') as f: # 如果没有该文件，就会报错
+    pass
+```
+
+#### 值错误——ValueError
+
+* 传入一个调用者不期望的值，即使这个值是合法的
+
+```python
+s = '1.3'
+n = int(s) # 字符串上表示的数字是浮点型，无法调用int函数
+```
+
+#### 索引错误——IndexError
+
+* 通常是下标超出序列边界
+
+```python
+ls = [1, 2, 3]
+ls[5] # 索引错误，索引最多到2
+```
+
+#### 类型错误——TypeError
+
+* 传入对象类型与要求不符
+
+```python
+1 + '3' # int 和 str 类型如何相加呢？
+```
+
+#### 其他异常
+
+* 还有很多其他的异常，如**NameError**，使用一个未被定义的变量；**KeyError**，试图访问字典里不存在的键……等。
+
+```python
+print(a) # 如果根本没有定义变量a，则会产生NameError错误
+d = {}
+d['1'] # 试图访问一个根本不存在的键，会产生KeyError错误
+```
+
+* 当异常发生的时候，通常会将程序中断，使得程序无法正常运行。但是这是我们常常不希望的。因此python提供了一种对异常加以处理的方法。
+
+
+
+### 异常处理
+
+* 对异常进行必要的处理，可以提高程序的稳定性和可靠性。
+
+#### 基本语句 try ... except ...
+
+* 如果 try 内的代码块顺利执行，则 except 代码块不会被触发。
+* 如果 try 内出现异常，则会触发 except 对应的代码块（如果异常类型与except上的一致）
+
+```python
+x = 10
+y = 0
+try:
+    z = x / y
+except ZeroDivisionError: # 预判一下会发生什么错误
+    print('0不可以被除！')
+
+# 输出：0不可以被除！ 程序不会异常中断
+```
+
+```python
+x = 10
+y = 0
+try:
+    z = x / y
+except NameError:
+    print('无该变量！')
+    
+# 虽然触发了ZeroDivisionError异常，但是没有触发NameError异常，所以程序还是会直接报错并中断。
+```
+
+* 需要注意的是这里预判的异常类型必须与产生的异常类型相一致才会报错。
+
+#### 多分支结构 try ... except ... except ...
+
+* 可以通过多个except语句形成多个预判和多个处理代码块。
+
+```python
+ls = []
+d = {'name': 'Tom'}
+try:
+    # 这里把其他的注释掉，每个都试一次，看看效果
+    y = m
+    ls[3]
+    d['age']
+except NameError:
+    print('变量名不存在！')
+except IndexError:
+    print('索引超出上限！')
+except KeyError:
+    print('键不存在')
+```
+
+#### 奖赏机制 try ... except ... else
+
+* 如果try语句后面的代码块没有报错，那么就会执行else语句，如果报错，执行except代码块。
+
+```python
+try:
+    with open('测试文件.txt') as f:
+        text = f.read()
+except FileNotFoundError:
+    print('找不到该文件')
+else:
+    print(text)
+```
+
+#### 必执行语句 try ... except ... finally
+
+* 无论try语句后面的代码块是否出错，finally都必须执行
+
+```python
+try:
+    with open('测试文件.txt') as f:
+        text = f.read()
+except FileNotFoundError:
+    print('找不到该文件')
+else:
+    print(text)
+finally:
+    print('读取完毕')
+```
+
+#### 万能异常（Exception）与异常捕获（as）
+
+* 如果我们事先不知道会产生哪种类型的异常，可以使用万能异常 **Exception**：
+
+```python
+x = 10
+y = 0
+try:
+    z = x / y
+except Exception:
+    print('发生未知错误') 
+
+# 这样ZeroDivisionError依然会检测出来，走except代码块。
+```
+
+* 如果我们需要输出程序产生了什么异常，那么我们可以使用异常捕获的格式：
+
+```python
+x = 10
+y = 0
+try:
+    z = x / y
+except Exception as e:
+    print('发生错误：' + str(e)) 
+
+# 发生错误：division by zero   这样就可以输出错误原因。
+```
+
+* 异常处理的语句基本上就是这些。
+
+
+
+* 至此，python语言从基础编程部分的基本语法到高级编程部分的相关的编程思路、底层实现、面向对象、文件、异常等特性都已经介绍完毕。可以说，我们向python编程又迈进了一大步。然而，要成为一个真正的python程序员，还有一个非常重要的内容需要熟悉，就是python的模块调用。我们将在下一篇笔记中加以探讨。
+
+
+
+* Written by：Sirius. Lu
+* Reference：深度之眼  python基础训练营
+* 2020.6.19
