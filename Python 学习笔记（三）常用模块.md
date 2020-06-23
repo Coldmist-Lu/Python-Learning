@@ -9,6 +9,8 @@
 * 本笔记将对Python的常用模块进行详细叙述，将从模块调用、python内置模块到常用的numpy、pandas、matplotlib模块等一一介绍。本笔记的内容主要基于深度之眼的Python基础训练营课程，在顺序和例子上面进行了一些修改和总结。
 * 本文对Python的基本语法特性将不做详细回顾，因此对于Python的基本语法的请参看笔记（一）基础编程和笔记（二）高级编程。
 
+* 本笔记在原课程的基础上添加了许多帮助文档上显示的信息，并且添加了一个章节来叙述如何阅读帮助文档。 
+
 
 
 目录
@@ -164,6 +166,8 @@ sys.path # 显示所有系统路径
 
 * sys.path 的第一个路径是当前执行文件所在的文件夹。
 
+
+
 ### 其他模块的导入
 
 * 如果一个模块不在系统的查找路径内，也不在系统路径中，那么我们又想使用这个模块，该怎么办呢？
@@ -183,20 +187,60 @@ fun3.f3()
 
 
 
-## python标准库
+## 帮助文档
 
-Python自身提供了比较丰富的生态，拿来即用，可极大提高开发效率。
+* python内置的帮助文档是我们学习模块的最好工具。由于python中有非常多的模块，以及非常多的类和函数，我们不可能像C语言、C++那样把所有函数全部记下他们的定义和参数的意义。而python具有matlab、R语言等都有的特性，那就是提供了帮助文档供使用者了解每个函数是如何使用的，以及传参细节。下面就基本的文档阅读方法做介绍：
 
 
 
-### time：用于处理时间的标准库
+### 查阅帮助文档
 
-#### 获取时间
+* 在Jupyter Notebook中查阅帮助文档的方法是：
+  * 函数名 ??
+* 还有一种通用的方法就是：
+  * help(函数名)
+* 需要注意的是上述方法中，如果需要查阅特定模块中的特定函数名，可以将函数名修改成：函数名.模块名
+
+
+
+### 函数定义的解释
+
+* 一般帮助文档会先给出一个函数定义，这里会给出参数列表以及传参的要求。
+
+* (制作时这部分省略，最后补充。)
+
+
+
+## time：用于处理时间的标准库
+
+### 获取时间 localtime、gmtime、ctime
 
 * **time.localtime()**  获取本地时间（如在中国，获取北京时间）
+
+  * 函数定义：
+
+  ```
+  localtime([seconds]) -> (tm_year,tm_mon,tm_mday,tm_hour,tm_min,
+                            tm_sec,tm_wday,tm_yday,tm_isdst)
+  ```
+  
+  * localtime() 函数默认从1970年1月1日8时0分0秒（称为the Epoch）开始计时。
+  * localtime() 可以接受一个整型数字参数seconds，该数字反映的是所需要得到的时刻相对于 the Epoch 有多少秒。
+  * 若不给出该参数，则默认使用现在的时间作为参数。
+  * localtime() 函数返回一个时间元组类型数据，将会清晰地显示现在的时间信息（年月日时分秒等）
+  
 * **time.gmtime()** UTC世界统一时间
 
-北京时间比世界统一时间早8个小时。
+  * 函数定义：
+
+  ```
+  gmtime([seconds]) -> (tm_year, tm_mon, tm_mday, tm_hour, tm_min,
+                         tm_sec, tm_wday, tm_yday, tm_isdst)
+  ```
+  
+  * gmtime() 的用法和 localtime 完全一致，只不过显示的是世界同一时间。
+  * 北京时间比世界统一时间早8个小时。
+  * 例子：
 
 ```python
 import time 
@@ -210,21 +254,58 @@ print(t_UTC)
 ```
 
 * 有时我们仅仅需要一个简单的时间，不用那么复杂，那么我们可以用 **time.ctime()** 函数获取一个本地时间的简单字符串。
+  
+  * 函数定义：
+  
+  ```
+  ctime([seconds]) -> string # 原文本中seconds参数不可省，其实可省。
+  ```
+  
+  * ctime() 函数与 localtime、gmtime 完全一致，只不过返回的是一个字符串形式。
 
 ```python
 time.ctime() # 'Fri Jun 19 23:27:49 2020'
 ```
 
-#### 时间戳
+
+
+### 时间戳 time、perf_counter、process_time
 
 * 时间戳函数的设计是为了实现计时器的功能。我们很多时候需要知道程序大概要运行多久，那么我们可以通过时间戳来进行设计。
 
 * **time.time()**   返回自纪元以来的秒数。
 
-* **time.perf_counter()**   随意选取一个时间点，记录现在到该时间的秒数。较 time.time() 精度稍高一些。
-* **time.process_time()**   随意选取一个时间点，记录现在到该时间的秒数。和上一个函数的区别是，不会将系统休眠时间算入。
+  * 函数定义：
 
+  ```
+  time() -> floating point number
+  ```
+
+  * time() 函数返回的秒数是一个浮点型数据。小数部分是代表一秒内的精度。
+
+* **time.perf_counter()**   随意选取一个时间点，记录现在到该时间的秒数。较 time.time() 精度稍高一些。
+  
+  * 函数定义：
+  
+  ```
+  perf_counter() -> float
+  ```
+  
+  * perf_counter 的全称是 performance counter（性能计数器），大概指的是从一个固定时间点开始提取一个秒数。
+  * 每次调用 perf_counter 都会提取一次秒数。从而可以实现计时。
+  
+* **time.process_time()**   随意选取一个时间点，记录现在到该时间的秒数。和上一个函数的区别是，不会将系统休眠时间算入。
+  
+  * 函数定义：
+  
+  ```
+  process_time() -> float
+  ```
+  
+  * 该函数每次返回的时间其实不完全是随便取的，而是 kernel 和 CPU 的使用时间之和。
+  
 * 需要注意的是，这些时间戳每次使用时随意选取仅仅在第一次调用时随机选，但是后续调用时依然按照第一次选取的时间进行。（否则就没法进行计时了嘛）。
+
 * 下面给出一个小例子：
 
 ```python
@@ -251,16 +332,204 @@ print("process_time方法：{:.3f}秒".format(t_3_end-t_3_start)) # process_time
 
 明显可以看出，process_time减去了休眠的大概5秒钟。
 
-#### 自定义格式化输出
 
-* 利用 time.strftime() 函数可以自定义时间格式输出：
+
+### 自定义格式化输出 strftime
+
+* **time.strftime()**  该函数可以自定义时间格式输出：
+  
+  * 函数定义：
+  
+  ```
+  strftime(format[, tuple]) -> string
+  ```
+  
+  * 首先输入一个格式字符串代表所需格式（具体格式请参看帮助文档），以及一个时间元组，就能按照这个格式输出。若不提供元组信息，那么就会使用 localtime 输出。
+  * 请参看帮助文档获取详细信息。
 
 ```python
 lctime = time.localtime()
 time.strftime("%Y-%m-%d %A %H:%M:%S", lctime) # '2020-06-19 Friday 23:38:42'
 ```
 
-#### 睡觉觉
 
-* 利用 time.sleep() 函数可以实现一定时间的系统休眠。上面的例子已经演示过了。
+
+### 睡觉觉 sleep
+
+* 利用 **time.sleep()** 函数可以实现一定时间的系统休眠。上面的例子已经演示过了。sleep函数需要提供一个参数，可以设定睡眠时间。
+* 函数定义：
+
+```
+sleep(seconds)
+```
+
+
+
+## random：用于获取随机化数据的标准库
+
+* Python产生的随机数依然是伪随机数，即根据随机化种子生成。所以从某种意义上来说具有确定性。
+* random库中的random是一个类，方法中有的静态方法也可以直接调用。
+
+### 基本随机化
+
+#### 随机数种子 seed
+
+* **random.seed()** 
+
+* 函数定义：
+
+```
+random.seed(a=None, version=2)
+```
+
+* seed() 方法用于初始化随机数种子。通过初始化该种子，可实现对其他初始化函数的随机化。
+* 如果不给出随机化种子，则按照系统时间初始化。每做完一次随机数提取后，应该重新初始化该种子。
+* 需要注意的是，对于同一个随机化函数，如果随机数种子也一致，那么函数得到的结果也一致。
+
+#### 随机数产生 random
+
+* **random.random()**
+
+  * 函数定义：
+
+  ```
+  random() -> x in the interval [0, 1).
+  ```
+
+  * random() 方法用于产生一个0~1之间的随机数。下面我们用这个方法与seed结合验证一下刚才的结论：
+
+  ```python
+  import random
+  random.seed(10) # 初始化种子为10
+  random.random() # 0.5714025946899135
+  random.seed(10) # 初始化种子为10
+  random.random() # 0.5714025946899135 产生的随机数不变
+  ```
+
+
+
+### 随机整数 randint、randrange
+
+* **random.randint(a, b)**
+
+  * randint() 方法返回一个 [a, b] 之间的随机整数，包括两端点。
+  * 给出一个小例子：
+
+  ```python
+  import random
+  
+  numbers = [random.randint(0, 10) for i in range(10)]
+  numbers
+  # [9, 0, 3, 7, 7, 4, 10, 2, 0, 8]
+  ```
+
+* **random.randrange(a)** 
+
+  * 函数定义：
+
+  ```
+  random.randrange(start, stop=None, step=1, _int=<class 'int'>)
+  ```
+
+  * randrange(a) 方法产生一个 [0, a) 之间的随机整数，不包括右端点。
+  * 给出一个小例子：
+
+  ```python
+  import random
+  
+  numbers = [random.randrange(10) for i in range(10)]
+  numbers
+  # [7, 5, 1, 3, 5, 0, 6, 2, 9, 5]
+  ```
+
+  * randrange(a, b) 方法产生一个 [a, b) 之间的随机整数，不包括右端点。
+  * randrange(a, b, step) 方法产生一个按照 step 步长划分的 [a, b) 之间的随机整数，不包括右端点。
+
+
+
+### 随机浮点数 random、uniform
+
+* **random.random()** 产生 (0.0, 1.0) 之间的随机浮点数。
+* **random.uniform(a, b)** 产生 [a, b] 之间的随机浮点数。
+* 上述两者都符合均匀分布。用法和整数几乎一致，略。
+
+
+
+### 序列用函数 choice、choices、shuffle、sample
+
+#### 随机取样
+
+* **random.choice()**  从序列类型中随机取一个元素
+
+  * 函数定义：
+
+  ```python
+  random.choice(seq)
+  ```
+
+  * 常见用法：
+
+  ```python
+  import random
+  
+  random.choice(['win', 'lose', 'draw']) # 'draw'  在列表元素中随便取一个
+  ```
+
+* **random.choices()**
+
+  * 函数定义：
+
+  ```python
+  random.choices(population, weights=None, *, cum_weights=None, k=1)
+  ```
+
+  * population参数和seq差不多，weights参数可以给出每个元素的相对权重，cum_weights是累积权重（两者给一个即可）。
+  * k代表的是返回的随机选择的数量。可以根据所需要的选择结果进行修改。默认返回一个。
+
+  ```python
+  import random
+  
+  random.choices(['win', 'lose', 'draw'], k=5) # ['lose', 'win', 'draw', 'lose', 'draw']
+  random.choices(['win', 'lose', 'draw'], weights = [4,4,1], k=5)
+  # ['draw', 'win', 'lose', 'win', 'lose']
+  ```
+
+#### 随机打乱
+
+* **random.shuffle() ** 将一个序列数据打乱
+
+  * 函数定义：
+
+  ```python
+  random.shuffle(x, random=None)
+  ```
+
+  * 小例子：
+
+  ```python
+  numbers = ['one', 'two', 'three', 'four']
+  random.shuffle(numbers)
+  numbers # ['one', 'four', 'two', 'three']
+  ```
+
+#### 不放回随机抽样
+
+* **random.sample()**
+
+  * 函数定义：
+
+  ```python
+  random.sample(population, k)
+  ```
+
+  * population为序列，k为抽样的个数。
+  * 小例子：
+
+  ```python
+  random.sample([10, 20, 30, 40, 50], 3) # [20, 30, 50]
+  ```
+
+
+
+
 
