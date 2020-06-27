@@ -412,7 +412,7 @@ time.strftime("%Y-%m-%d %A %H:%M:%S", lctime) # '2020-06-19 Friday 23:38:42'
 
 #### 随机打乱
 
-* **random.shuffle(seq) ** 将一个序列数据打乱
+* **random.shuffle(seq)** 将一个序列数据打乱
 
   * 小例子：
 
