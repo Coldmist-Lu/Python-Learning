@@ -708,9 +708,301 @@ d # deque(['b', 'c', 'd', 'e', 'f'])
 
 ### 排列组合迭代器
 
-* 求笛卡尔积 product
+#### 求笛卡尔积 product
+
+* 基本用法：
+
+```python
+import itertools
+
+for i in itertools.product('ABC', '12'):
+    print(i)
+    
+"""
+('A', '1')
+('A', '2')
+('B', '1')
+('B', '2')
+('C', '1')
+('C', '2')
+"""
+```
+
+* 使用 repeat 参数实现多个相同元素的笛卡尔积：
+
+```python
+for i in itertools.product('ABC', repeat=3):
+    print(i)
+    
+"""
+三个ABC的笛卡尔积：
+('A', 'A', 'A')
+('A', 'A', 'B')
+('A', 'A', 'C')
+('A', 'B', 'A')
+('A', 'B', 'B')
+('A', 'B', 'C')
+('A', 'C', 'A')
+...
+"""
+```
+
+#### 求排列 permutations
+
+* 求排列时，需要给出排列的长度r，若不给出，则默认返回全排列。
+
+```python
+for i in itertools.permutations('ABCD', r=3): # 参数列表也可以写成('ABCD', 3)
+    print(i)
+    
+"""
+ABCD的排列，长度为3：
+('A', 'B', 'C')
+('A', 'B', 'D')
+('A', 'C', 'B')
+('A', 'C', 'D')
+('A', 'D', 'B')
+('A', 'D', 'C')
+...
+"""
+```
+
+#### 求组合 combinations
+
+* 求组合数时，需要给出组合的长度r。若不给出会报错。
+
+```python
+for i in itertools.combinations('ABCD', 3):
+    print(i)
+    
+"""
+('A', 'B', 'C')
+('A', 'B', 'D')
+('A', 'C', 'D')
+('B', 'C', 'D')
+"""
+```
+
+#### 可重复组合 combinations_with_replacement
+
+* 可重复组合得到的元素是可以重复使用的。举例如下：
+
+```python
+for i in itertools.combinations_with_replacement('ABC', 2):
+    print(i)
+    
+"""
+('A', 'A')
+('A', 'B')
+('A', 'C')
+('B', 'B')
+('B', 'C')
+('C', 'C')
+"""
+```
+
+### 拉链
+
+* 拉链可以形象的认为是将多个序列类型的元素按照顺序拉合到一起输出的方法。
+
+#### 短拉链 zip
+
+* 注意短拉链是不在 itertools 库中的，所以调用的时候不需要加前缀。因为作用很重要所以我们放在这里使用：
+
+```python
+for i in zip('ABC', '123', 'def'):
+    print(i, ''.join(i))   # 后面的方式可以将它们聚合起来
+    
+"""
+('A', '1', 'd') A1d
+('B', '2', 'e') B2e
+('C', '3', 'f') C3f
+"""
+```
+
+* 短拉链之所以短，是因为如果拉链的各个序列长度不相同，那么会按照最短的那个序列长度进行输出。
+* 举个例子：
+
+```python
+for i in zip('ABC', 'defg', [1, 2, 3, 4, 5]): # ABC长度最短因此只会输出三个拉链结果
+    print(i)
+    
+"""
+('A', 'd', 1)
+('B', 'e', 2)
+('C', 'f', 3)
+"""
+```
+
+#### 长拉链 zip_longest
+
+* 长拉链是 itertools 库中的一个重要方法。它与 zip 的区别是会按照最长序列的长度输出。缺失元素用None或指定字符替代：
+
+```python
+for i in itertools.zip_longest('ABC', [1, 2, 3, 4, 5]):
+    print(i)
+    
+"""
+('A', 1)
+('B', 2)
+('C', 3)
+(None, 4)
+(None, 5)
+"""
+```
+
+* 通过设定 fillvalue 参数可以设定替代值：
+
+```python
+for i in itertools.zip_longest('ABC', [1, 2, 3, 4, 5], fillvalue = '?'):
+    print(i)
+    
+"""
+('A', 1)
+('B', 2)
+('C', 3)
+('?', 4)
+('?', 5)
+"""
+```
 
 
 
-* 求排列 permutations
+### 无穷迭代器
 
+#### 计数器 count
+
+* itertools.count(start=0, step=1)
+* 创建一个无穷迭代器，可给出一个初始值 start（默认为0）和步长（默认为1），返回均匀间隔的值。
+
+```python
+iter = itertools.count(10, 2)
+
+for i in range(10):
+    print(next(iter), end = " ")
+# 10 12 14 16 18 20 22 24 26 28 
+```
+
+#### 循环迭代器 cycle
+
+* itertools.cycle(iterable)
+* 循环迭代器对给出的序列中的所有元素进行不断的往复迭代。
+
+```python
+iter = itertools.cycle('ABC')
+
+for i in range(10):
+    print(next(iter), end = " ")
+# A B C A B C A B C A 
+```
+
+#### 重复迭代器 repeat
+
+* itertools.repeat(object[, times])
+* 重复迭代器会将 object 对象不断重复。如果不设置 times 参数则会一直重复。反之则只会重复 times 次。
+
+```python
+for i in itertools.repeat('ABC', 4):
+    print(i)
+"""
+ABC
+ABC
+ABC
+ABC
+"""
+```
+
+
+
+* itertools 中还有许多其他常用的迭代器，下面将逐一介绍：
+
+### 锁链 chain
+
+* itertools.chain(iterables)
+* 锁链迭代器将一组迭代对象串联起来，返回一个这些对象组成的更大的迭代器：
+
+```python
+for i in itertools.chain('ABC', [1, 2, 3], ['DE', 'fg']):
+    print(i, end = " ")
+# A B C 1 2 3 DE fg 
+```
+
+
+
+### 枚举迭代器 enumerate
+
+* enumerate(iterable, start=0) # python内置方法
+* 枚举迭代器是 python 的一种内置方法，不需要调用 itertools 库。
+* 该方法产生由（index，item）两个元素组成的元组。index 是索引，从 start（默认为0）开始，item 会从给出的 iterable 中取。
+
+```python
+for i in enumerate('Python', start = 1):
+    print(i)
+    
+"""
+(1, 'P')
+(2, 'y')
+(3, 't')
+(4, 'h')
+(5, 'o')
+(6, 'n')
+"""
+```
+
+
+
+### 分组迭代器 groupby
+
+* itertools.groupby(iterable, key=None)
+* 该迭代器会按照 key 指定的方式，对 iterable 中的**连续元素**进行分组。
+* 该迭代器会返回的每个数据包括一个键和一个组内成员组成的**迭代器**。
+* 下面的例子是不指定 key 的情况。会按照元素的连续性进行分组：
+
+```python
+for key, group in itertools.groupby('AAAABBBCCDAABBB'):
+    print(key, list(group)) # 将group迭代器转化成list输出
+    
+"""
+A ['A', 'A', 'A', 'A']
+B ['B', 'B', 'B']
+C ['C', 'C']
+D ['D']
+A ['A', 'A']
+B ['B', 'B', 'B']
+"""
+```
+
+* 通过指定 key 我们可以分别实现按单词长度或首字母分组。一般我们会先对迭代器进行排序，再做分组：
+
+```python
+animals = ['duck', 'eagle', 'rat', 'giraffe', 'bear', 'bat', 'dolphin', 'shark', 'lion']
+animals.sort(key=len)
+print(animals) 
+# ['rat', 'bat', 'duck', 'bear', 'lion', 'eagle', 'shark', 'giraffe', 'dolphin']
+
+for key, group in itertools.groupby(animals, key=len): # 按单词长度分组
+    print(key, list(group))
+"""
+3 ['rat', 'bat']
+4 ['duck', 'bear', 'lion']
+5 ['eagle', 'shark']
+7 ['giraffe', 'dolphin']
+"""
+```
+
+```python
+animals.sort(key=lambda x:x[0])
+print(animals)
+# ['bat', 'bear', 'duck', 'dolphin', 'eagle', 'giraffe', 'lion', 'rat', 'shark']
+for key, group in itertools.groupby(animals, key=lambda x:x[0]): # 按首字母分组
+    print(key, list(group))   
+"""
+b ['bat', 'bear']
+d ['duck', 'dolphin']
+e ['eagle']
+g ['giraffe']
+l ['lion']
+r ['rat']
+s ['shark']
+"""
+```
