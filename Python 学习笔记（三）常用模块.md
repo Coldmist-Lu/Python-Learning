@@ -213,31 +213,15 @@ fun3.f3()
 
 ## time：用于处理时间的标准库
 
-### 获取时间 localtime、gmtime、ctime
+### 获取时间
 
 * **time.localtime()**  获取本地时间（如在中国，获取北京时间）
-
-  * 函数定义：
-
-  ```
-  localtime([seconds]) -> (tm_year,tm_mon,tm_mday,tm_hour,tm_min,
-                            tm_sec,tm_wday,tm_yday,tm_isdst)
-  ```
-  
   * localtime() 函数默认从1970年1月1日8时0分0秒（称为the Epoch）开始计时。
   * localtime() 可以接受一个整型数字参数seconds，该数字反映的是所需要得到的时刻相对于 the Epoch 有多少秒。
   * 若不给出该参数，则默认使用现在的时间作为参数。
   * localtime() 函数返回一个时间元组类型数据，将会清晰地显示现在的时间信息（年月日时分秒等）
-  
+
 * **time.gmtime()** UTC世界统一时间
-
-  * 函数定义：
-
-  ```
-  gmtime([seconds]) -> (tm_year, tm_mon, tm_mday, tm_hour, tm_min,
-                         tm_sec, tm_wday, tm_yday, tm_isdst)
-  ```
-  
   * gmtime() 的用法和 localtime 完全一致，只不过显示的是世界同一时间。
   * 北京时间比世界统一时间早8个小时。
   * 例子：
@@ -254,13 +238,7 @@ print(t_UTC)
 ```
 
 * 有时我们仅仅需要一个简单的时间，不用那么复杂，那么我们可以用 **time.ctime()** 函数获取一个本地时间的简单字符串。
-  
-  * 函数定义：
-  
-  ```
-  ctime([seconds]) -> string # 原文本中seconds参数不可省，其实可省。
-  ```
-  
+
   * ctime() 函数与 localtime、gmtime 完全一致，只不过返回的是一个字符串形式。
 
 ```python
@@ -269,41 +247,20 @@ time.ctime() # 'Fri Jun 19 23:27:49 2020'
 
 
 
-### 时间戳 time、perf_counter、process_time
+### 时间戳
 
 * 时间戳函数的设计是为了实现计时器的功能。我们很多时候需要知道程序大概要运行多久，那么我们可以通过时间戳来进行设计。
 
 * **time.time()**   返回自纪元以来的秒数。
-
-  * 函数定义：
-
-  ```
-  time() -> floating point number
-  ```
-
   * time() 函数返回的秒数是一个浮点型数据。小数部分是代表一秒内的精度。
 
 * **time.perf_counter()**   随意选取一个时间点，记录现在到该时间的秒数。较 time.time() 精度稍高一些。
-  
-  * 函数定义：
-  
-  ```
-  perf_counter() -> float
-  ```
-  
   * perf_counter 的全称是 performance counter（性能计数器），大概指的是从一个固定时间点开始提取一个秒数。
   * 每次调用 perf_counter 都会提取一次秒数。从而可以实现计时。
-  
+
 * **time.process_time()**   随意选取一个时间点，记录现在到该时间的秒数。和上一个函数的区别是，不会将系统休眠时间算入。
-  
-  * 函数定义：
-  
-  ```
-  process_time() -> float
-  ```
-  
   * 该函数每次返回的时间其实不完全是随便取的，而是 kernel 和 CPU 的使用时间之和。
-  
+
 * 需要注意的是，这些时间戳每次使用时随意选取仅仅在第一次调用时随机选，但是后续调用时依然按照第一次选取的时间进行。（否则就没法进行计时了嘛）。
 
 * 下面给出一个小例子：
@@ -334,16 +291,9 @@ print("process_time方法：{:.3f}秒".format(t_3_end-t_3_start)) # process_time
 
 
 
-### 自定义格式化输出 strftime
+### 自定义格式化输出
 
 * **time.strftime()**  该函数可以自定义时间格式输出：
-  
-  * 函数定义：
-  
-  ```
-  strftime(format[, tuple]) -> string
-  ```
-  
   * 首先输入一个格式字符串代表所需格式（具体格式请参看帮助文档），以及一个时间元组，就能按照这个格式输出。若不提供元组信息，那么就会使用 localtime 输出。
   * 请参看帮助文档获取详细信息。
 
@@ -354,14 +304,9 @@ time.strftime("%Y-%m-%d %A %H:%M:%S", lctime) # '2020-06-19 Friday 23:38:42'
 
 
 
-### 睡觉觉 sleep
+### 睡觉觉
 
-* 利用 **time.sleep()** 函数可以实现一定时间的系统休眠。上面的例子已经演示过了。sleep函数需要提供一个参数，可以设定睡眠时间。
-* 函数定义：
-
-```
-sleep(seconds)
-```
+* 利用 **time.sleep(seconds)** 函数可以实现一定时间的系统休眠。上面的例子已经演示过了。sleep函数需要提供一个参数，可以设定睡眠时间。
 
 
 
@@ -372,29 +317,18 @@ sleep(seconds)
 
 ### 基本随机化
 
-#### 随机数种子 seed
+#### 随机数种子
 
 * **random.seed()** 
 
-* 函数定义：
-
-```
-random.seed(a=None, version=2)
-```
 
 * seed() 方法用于初始化随机数种子。通过初始化该种子，可实现对其他初始化函数的随机化。
 * 如果不给出随机化种子，则按照系统时间初始化。每做完一次随机数提取后，应该重新初始化该种子。
 * 需要注意的是，对于同一个随机化函数，如果随机数种子也一致，那么函数得到的结果也一致。
 
-#### 随机数产生 random
+#### 随机数产生
 
 * **random.random()**
-
-  * 函数定义：
-
-  ```
-  random() -> x in the interval [0, 1).
-  ```
 
   * random() 方法用于产生一个0~1之间的随机数。下面我们用这个方法与seed结合验证一下刚才的结论：
 
@@ -408,7 +342,7 @@ random.seed(a=None, version=2)
 
 
 
-### 随机整数 randint、randrange
+### 随机整数
 
 * **random.randint(a, b)**
 
@@ -424,12 +358,6 @@ random.seed(a=None, version=2)
   ```
 
 * **random.randrange(a)** 
-
-  * 函数定义：
-
-  ```
-  random.randrange(start, stop=None, step=1, _int=<class 'int'>)
-  ```
 
   * randrange(a) 方法产生一个 [0, a) 之间的随机整数，不包括右端点。
   * 给出一个小例子：
@@ -447,7 +375,7 @@ random.seed(a=None, version=2)
 
 
 
-### 随机浮点数 random、uniform
+### 随机浮点数
 
 * **random.random()** 产生 (0.0, 1.0) 之间的随机浮点数。
 * **random.uniform(a, b)** 产生 [a, b] 之间的随机浮点数。
@@ -455,17 +383,11 @@ random.seed(a=None, version=2)
 
 
 
-### 序列用函数 choice、choices、shuffle、sample
+### 序列用函数
 
 #### 随机取样
 
-* **random.choice()**  从序列类型中随机取一个元素
-
-  * 函数定义：
-
-  ```python
-  random.choice(seq)
-  ```
+* **random.choice(seq)**  从序列类型中随机取一个元素
 
   * 常见用法：
 
@@ -475,13 +397,7 @@ random.seed(a=None, version=2)
   random.choice(['win', 'lose', 'draw']) # 'draw'  在列表元素中随便取一个
   ```
 
-* **random.choices()**
-
-  * 函数定义：
-
-  ```python
-  random.choices(population, weights=None, *, cum_weights=None, k=1)
-  ```
+* **random.choices(population, weights, k)**
 
   * population参数和seq差不多，weights参数可以给出每个元素的相对权重，cum_weights是累积权重（两者给一个即可）。
   * k代表的是返回的随机选择的数量。可以根据所需要的选择结果进行修改。默认返回一个。
@@ -496,13 +412,7 @@ random.seed(a=None, version=2)
 
 #### 随机打乱
 
-* **random.shuffle() ** 将一个序列数据打乱
-
-  * 函数定义：
-
-  ```python
-  random.shuffle(x, random=None)
-  ```
+* **random.shuffle(seq) ** 将一个序列数据打乱
 
   * 小例子：
 
@@ -514,13 +424,7 @@ random.seed(a=None, version=2)
 
 #### 不放回随机抽样
 
-* **random.sample()**
-
-  * 函数定义：
-
-  ```python
-  random.sample(population, k)
-  ```
+* **random.sample(population, k)**
 
   * population为序列，k为抽样的个数。
   * 小例子：
@@ -531,5 +435,282 @@ random.seed(a=None, version=2)
 
 
 
+### 概率分布
 
+* 产生高斯分布随机数：
+* **random.gauss(mean, std)**  产生一个符合高斯分布的随机数。
+* 小例子：
+
+```python
+number = random.gauss(0, 1)
+number # -0.860007653790428
+```
+
+* 产生多个随机数并画直方图：
+
+```python
+import matplotlib.pyplot as plt
+
+res = [gauss(0, 1) for i in range(100000)]
+plt.hist(res, bins = 1000)
+plt.show()
+```
+
+![1](1.png)
+
+
+
+### 使用random库的小例子
+
+#### 分配红包
+
+* 模拟微信上给人分配不同金额的红包。期望意义上大家的分配金额都一致。
+
+```python
+import random
+
+def red_packet(total, num):
+    for i in range(1, num):
+        per = random.uniform(0.01, total/(num-i+1)*2)
+        total = total - per
+        print("第{}位红包金额：{:.2f}元".format(i, per))
+    else:
+        print("第{}位红包金额：{:.2f}元".format(num, total))
+        
+red_packet(5, 10)
+```
+
+#### 验证码生成
+
+* 模拟生成4位由数字和字母组成的验证码。
+
+```python
+import random
+import string
+
+print(string.digits) # 数字字符
+print(string.ascii_letters) # 字母字符
+
+s = string.digits + string.ascii_letters
+v = random.sample(s, 4)
+
+print(v) # 打印4个字符
+print(''.join(v)) # 聚合输出
+```
+
+
+
+## collections：提供不同的容器（数据类型）
+
+* 该库可以看成是数据类型的扩展。
+
+### 具名元组 namedtuple
+
+#### 定义
+
+* 故名思义，具名元组，应该和**元组**有关。
+
+* 如果我们需要表达一个点坐标，但是仅根据数据很难表示，如：
+
+```python
+p = (1, 2)
+```
+
+* 我们可以给每一个值一个名字，这样产生的元组就是具名元组。
+* 具名元组的定义方法如下：
+
+```
+collections.namedtuple(typename, field_names, ...)
+```
+
+* typename是元组名字，field_names是域名。
+
+```python
+_Point = collections.namedtuple('Point', ['x', 'y'])
+p = _Point(1, y=2)
+p # Point(x=1, y=2)
+```
+
+* 上例中_Point和Point只是为了区分变量的不同。实际应用中可以采用相同的变量。
+
+#### 性质与属性
+
+* 调用属性
+
+```python
+p.x # 1
+p.y # 2
+```
+
+* 具备元组的性质
+
+```python
+p[0] # 1
+p[1] # 2
+x, y = p # 解包赋值
+x # 1
+y # 2
+```
+
+* 是元组的子类？
+
+```python
+isinstance(p, tuple) # True
+```
+
+#### 使用
+
+* 模拟扑克牌
+
+```python 
+Card = collections.namedtuple('Card', ['rank', 'suit'])
+ranks = [str(n) for n in range(2, 11)] + list('JQKA')
+suits = 'spades diamonds clubs hearts'.split()
+
+print('ranks', ranks)
+# ranks ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+print('suits', suits)
+# suits ['spades', 'diamonds', 'clubs', 'hearts']
+
+cards = [Card(rank, suit) for rank in ranks
+                          for suit in suits]
+cards
+
+"""
+ [Card(rank='2', suit='spades'),
+ Card(rank='2', suit='diamonds'),
+ Card(rank='2', suit='clubs'),
+ Card(rank='2', suit='hearts'),
+ Card(rank='3', suit='spades'),
+ ... ]
+"""
+
+from random import *
+
+shuffle(cards) # 洗牌
+choice(cards) # 随机抽一张牌
+sample(cards, k=5) # 随机抽取多张牌
+```
+
+
+
+### 计数器工具 Counter
+
+#### 引例
+
+* 小例子：统计单词出现次数
+
+```python
+from collections import Counter
+
+s = '牛奶奶找刘奶奶买牛奶'
+colors = ['red', 'blue', 'red', 'green', 'blue', 'blue']
+
+cnt_str = Counter(s)
+cnt_color = Counter(colors)
+print(cnt_str)
+# Counter({'奶': 5, '牛': 2, '找': 1, '刘': 1, '买': 1})
+print(cnt_color)
+# Counter({'blue': 3, 'red': 2, 'green': 1})
+```
+
+* 实际上，计数器工具是**字典**的一个子类：
+
+```python
+print(isinstance(Counter(), dict)) # True
+```
+
+#### 常用方法
+
+* 最高频率统计：**most_common(n)**
+
+    * 提供n个频率最高的元素和计数。
+
+    ```python
+    cnt_color.most_common(2)
+    # [('blue', 3), ('red', 2)]
+    ```
+
+* 元素展开：**elements()**
+
+    * 将展开后的元素以列表的形式输出：
+
+    ```python
+    list(cnt_str.elements())
+    # ['牛', '牛', '奶', '奶', '奶', '奶', '奶', '找', '刘', '买']
+    ```
+
+* 加减操作：
+
+    * 可以将两个计数器的值进行相加或相减：
+
+    ```python
+    c = Counter(a = 3, b = 1) # 这样赋值也可以
+    d = Counter(a = 1, b = 2, c = 1)
+    c + d # Counter({'a': 4, 'b': 3, 'c': 1})
+    ```
+
+#### 小例子
+
+* 一副牌中抽取10张，大于10点的概率是多少？（JQKA，不算2）
+
+```python
+cards = collections.Counter(big_cards=16, low_cards=36)
+seen = random.sample(list(cards.elements()), k=10)
+seen.count('big_cards') / 10 # 0.5
+```
+
+
+
+### 双向队列 deque
+
+#### 定义
+
+* 列表对数据的访问非常快速，但是插入和删除操作很慢，因为必须通过移动元素位置的方法来实现。
+* 特别是 list.insert(0, v) 和 list.pop(0)，在列表开始进行插入和删除操作。效率极低。
+* 双向队列可以方便且高效地在队列两边增删元素。
+
+#### 使用
+
+* 定义双向队列
+
+```python
+from collections import deque
+
+d = deque('cde')
+d # deque(['c', 'd', 'e'])
+```
+
+* 增加元素
+
+```python
+d.append('f') # 向右增加
+d.append('g')
+d.appendleft('b') # 向左增加
+d.appendleft('a')
+d # deque(['a', 'b', 'c', 'd', 'e', 'f', 'g'])
+```
+
+* 删除元素
+
+```python
+d.pop() # 从右删除
+d # deque(['a', 'b', 'c', 'd', 'e', 'f'])
+d.popleft() # 从左删除
+d # deque(['b', 'c', 'd', 'e', 'f'])
+```
+
+* 更多用法详见官方文档。
+
+
+
+## itertools：提供不同的迭代器
+
+### 排列组合迭代器
+
+* 求笛卡尔积 product
+
+
+
+* 求排列 permutations
 
