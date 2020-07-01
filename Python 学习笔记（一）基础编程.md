@@ -757,12 +757,12 @@
 
 * any() 函数与 all() 函数
 
-  * any() 是否有元素为True
-  * all() 是否所有元素都为True
+  * any() 是否有元素为True，如果一个及以上元素为True，则返回True；否则返回False。
+  * all() 是否所有元素都为True，如果所有元素都为True，则返回True；否则返回False。
 
   ```python
-  any([False, 1, 0, None])  # False    注意，0, False, None 都可以表示“无”的意思
-  all([False, 1, 0, None])  # True     注意，非0元素也看作为True
+  any([False, 1, 0, None])  # True     注意，0, False, None 都可以表示“无”的意思
+  all([False, 1, 0, None])  # False    注意，非0元素也看作为True
   ```
 
 
