@@ -207,9 +207,9 @@ pd.DataFrame(population) # 结果如图1
 pd.DataFrame(population, columns=["population"]) # 增设columns列标签，结果如图2
 ```
 
-![pd1](E:\Git\Python-Learning\pandas\pd1.png)
+![pd1](pandas/pd1.png)
 
-![pd2](E:\Git\Python-Learning\pandas\pd2.png)
+![pd2](pandas/pd2.png)
 
 * 图中，增设 columns 参数可改变列的名字，即标签。
 * 一般这种方法用于将 Series 对象转化为 DataFrame 对象。
