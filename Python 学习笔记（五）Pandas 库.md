@@ -20,8 +20,6 @@
 
 ```python
 import pandas as pd
-
-...
 ```
 
 
@@ -117,3 +115,464 @@ data['c'] # 3.0  字符串被强制转换成浮点型
 ```
 
 #### data = ndarray
+
+* 可由 numpy 数组作为 data 创建 Series 对象：
+
+```python
+import numpy as np
+
+x = np.arange(5) # 创建 numpy 数组
+pd.Series(x)
+"""
+0    0
+1    1
+2    2
+3    3
+4    4
+dtype: int32
+"""
+```
+
+#### data, index = dict
+
+* 可由字典直接创建 Series 对象：
+  * 其中，默认以键作为 index，值作为 data。
+  * 如果指定 index，则系统会根据 index 的内容到字典键中筛选，将找到的值作为 data，找不到的设为 NaN（空值）。
+
+```python
+population_dict = {"BeiJing": 2154,
+                   "ShangHai": 2424,
+                   "ShenZhen": 1303,
+                   "HangZhou": 981 }
+population = pd.Series(population_dict)    
+population
+"""
+BeiJing     2154 # 键作为索引，值作为数据
+ShangHai    2424
+ShenZhen    1303
+HangZhou     981
+dtype: int64
+"""
+population = pd.Series(population_dict, index=["BeiJing", "HangZhou", "c", "d"]) # 提供index
+population
+"""
+BeiJing     2154.0 # 按照提供的index设置索引
+HangZhou     981.0
+c              NaN # c、d找不到对应的键，置为NaN
+d              NaN
+dtype: float64
+"""
+```
+
+#### data = 标量
+
+* 类似于 numpy 数组的**广播机制**，当数据只有1个量时，Series 对象的创建会根据索引将结果传递给所有的数据。
+
+```python
+pd.Series(5, index=[100, 200, 300])
+"""
+100    5
+200    5
+300    5
+dtype: int64
+"""
+```
+
+
+
+### DataFrame 对象
+
+* DataFrame 是一种带标签（索引）数据的**多维数组**。
+
+#### 格式
+
+* DataFrame 的创建格式如下：
+* **pd.DataFrame(data, index, columns)**
+  * data 必须给出，可以是列表、字典、numpy 数组、Series 对象。
+  * index 为索引，为可选参数。
+  * columns 为列标签，为可选参数。
+
+#### data = Series
+
+* data 项可以直接使用上一节描述的 Series 对象进行创建。
+
+```python
+population_dict = {"BeiJing": 2154,
+                   "ShangHai": 2424,
+                   "ShenZhen": 1303,
+                   "HangZhou": 981 }
+
+population = pd.Series(population_dict)    
+pd.DataFrame(population) # 结果如图1
+pd.DataFrame(population, columns=["population"]) # 增设columns列标签，结果如图2
+```
+
+![pd1](pandas 笔记图片/pd1.png)
+
+![pd2](pandas 笔记图片/pd2.png)
+
+* 图中，增设 columns 参数可改变列的名字，即标签。
+* 一般这种方法用于将 Series 对象转化为 DataFrame 对象。
+
+#### data = "Series dict"
+
+* 如果存在多个 Series 对象需要转化成一个 DataFrame。
+
+```python
+population_dict = {"BeiJing": 2154,
+                   "ShangHai": 2424,
+                   "ShenZhen": 1303,
+                   "HangZhou": 981 }
+population = pd.Series(population_dict)  
+
+GDP_dict = {"BeiJing": 30320,
+            "ShangHai": 32680,
+            "ShenZhen": 24222,
+            "HangZhou": 13468 }
+GDP = pd.Series(GDP_dict)
+
+pd.DataFrame({"population": population,
+              "GDP": GDP}) # data参数是一个字典，而字典的每个键对应的是columns，值对应的是Series对象。 
+```
+
+![pd3](pandas 笔记图片/pd3.png)
+
+* DataFrame 的这种创建方式依然支持广播机制：
+
+```python
+# 接上例
+pd.DataFrame({"population": population,
+              "GDP": GDP,
+              "country": "China"}) # country值会自动填充到每一行
+```
+
+![pd4](pandas 笔记图片/pd4.png)
+
+#### data = "dict list"
+
+* DataFrame 支持从字典列表型数据转换，我们看下面的例子：
+
+```python
+data = [{'a':i, 'b': 2*i} for i in range(3)]
+data # [{'a': 0, 'b': 0}, {'a': 1, 'b': 2}, {'a': 2, 'b': 4}]
+data = pd.DataFrame(data)
+```
+
+![pd5](pandas 笔记图片/pd5.png)
+
+* data 是一个字典构成的列表，可以直接作为 data 参数传入 DataFrame 创建。
+
+* 需要注意的是，DataFrame 格式可以重新抽取出 Series 格式的对象，具体方法如下：
+
+```python
+data1 = data["a"].copy() # 抽取标签为a的列的副本（如果去掉.copy()，那么对data1的修改就会影响data
+data1
+"""
+0    0
+1    1
+2    2
+Name: a, dtype: int64
+"""
+data1[0] = 10 # 可对该内容进行修改，且不会影响data数据框
+```
+
+* 如果键不存在，会标记成默认值NaN：
+
+```python
+data = [{'a':1, 'b':1}, {'b':3, 'c':4}]
+pd.DataFrame(data)
+```
+
+![pd6](pandas 笔记图片/pd6.png)
+
+#### data = ndarray
+
+* 通过 numpy 数组也可以创建 DataFrame：
+
+```python
+data = np.random.randint(10, size=(3, 2))
+pd.DataFrame(data, columns=['foo', 'bar'], index=['a', 'b', 'c'])
+```
+
+![pd7](pandas 笔记图片/pd7.png)
+
+
+
+## 性质
+
+### 属性
+
+下面的例子基于上文 population & GDP 的 DataFrame：
+
+```python
+df = pd.DataFrame({"pop": population, "GDP": GDP})
+df
+```
+
+![pd8](pandas 笔记图片/pd8.png)
+
+#### dataframe -> numpy
+
+* **df.values** 返回由 numpy 数组表示的数据：
+
+```python
+df.values
+"""
+array([[ 2154, 30320],
+       [ 2424, 32680],
+       [ 1303, 24222],
+       [  981, 13468]], dtype=int64)
+"""
+```
+
+#### row index
+
+* **df.index** 返回行索引：
+
+```python
+df.index
+"""
+Index(['BeiJing', 'ShangHai', 'ShenZhen', 'HangZhou'], dtype='object')
+"""
+```
+
+#### columns
+
+* **df.columns** 返回列索引
+
+```python
+df.columns
+"""
+Index(['pop', 'GDP'], dtype='object')
+"""
+```
+
+#### shape
+
+* **df.shape** 返回数据的形状
+
+```python
+df.shape # (4, 2)
+```
+
+#### size
+
+* **df.size** 返回数据的大小（数据的数量）
+
+```python
+df.size # 8
+```
+
+#### datatypes
+
+* df.dtypes 返回每列数据的数据类型
+
+```python
+df.dtypes
+"""
+pop    int64
+GDP    int64
+dtype: object
+"""
+```
+
+
+
+### 索引
+
+* 本部分依然采用属性章节的例子：
+
+```python
+df = pd.DataFrame({"pop": population, "GDP": GDP})
+df
+```
+
+![pd9](pandas 笔记图片/pd9.png)
+
+* 需要注意的是，索引的结果大多都是**视图**而非副本，所以在索引结果上进行修改会影响到原 DataFrame 的数据！
+
+#### 获取列
+
+* 字典式：**df["columns_name"]** 通过索引法获取列（标签用**字符串**表示），返回一个 Series 对象。
+  * 该方法参数可以是一个字符串列表，用来索引**多个列**。返回一个 DataFrame 对象。
+* 对象属性式：**df.columns_name** 通过对象属性获取列（直接写标签，不要使用字符串），返回一个 Series 对象。
+
+```python
+df['pop'] # 获取pop列
+"""
+BeiJing     2154   # 输出为一个Series
+ShangHai    2424
+ShenZhen    1303
+HangZhou     981
+Name: pop, dtype: int64
+"""
+df[['GDP', 'pop']]
+# 输出为一个新的dataframe，如下图
+
+df.GDP
+"""
+BeiJing     30320  # 输出为一个Series
+ShangHai    32680
+ShenZhen    24222
+HangZhou    13468
+Name: GDP, dtype: int64
+"""
+```
+
+[图10]
+
+#### 获取行
+
+* 绝对索引法：**df.loc["row_name"]** 通过索引名获取一行（索引用字符串表示），返回一个 Series 对象。
+* 相对索引法：**df.iloc[num]** 通过输入行数获取一行，返回 Series 对象。
+* 上述两种方法都可以用列表形式输入（绝对索引用字符串列表，相对索引用整数列表），返回一个 DataFrame 对象。
+
+```python
+df.loc['BeiJing'] # 绝对索引
+df.iloc[0] # 相对索引，这两行的返回结果完全相同，就写到一起了：
+"""
+pop     2154
+GDP    30320
+Name: BeiJing, dtype: int64
+"""
+df.loc[['BeiJing', 'HangZhou']] # 绝对索引
+df.iloc[[0, 3]] # 相对索引，这两行返回结果完全相同，如下图
+```
+
+[图11]
+
+#### 获取表中一个值（标量）
+
+* 有三种获取方式：
+  * **df.loc["row_name", "column_name"]**
+  * **df.iloc[row_num, col_num]**
+  * **df.value[row_num] [col_num]**
+
+```python
+df.loc['BeiJing', 'GDP'] # 30320
+df.iloc[0, 1] # 30320
+df.value[0][1] # 30320
+```
+
+#### Series 对象的索引
+
+* 对 Series 对象直接使用 Series["index_name"] 即可索引：
+
+```python
+GDP = data.GDP
+GDP
+"""
+BeiJing     30320
+ShangHai    32680
+ShenZhen    24222
+HangZhou    13468
+Name: GDP, dtype: int64
+"""
+GDP['BeiJing'] # 30320
+```
+
+
+
+### 切片
+
+* 本节将介绍 DataFrame 的常见切片方式。内容将基于以下 DataFrame：
+
+```python
+dates = pd.date_range(start='2019-01-01', periods=6)
+dates
+"""
+DatetimeIndex(['2019-01-01', '2019-01-02', '2019-01-03', '2019-01-04',
+               '2019-01-05', '2019-01-06'],
+              dtype='datetime64[ns]', freq='D')
+"""
+df = pd.DataFrame(np.random.randn(6,4), index=dates, columns=["A", "B", "C", "D"])
+df # 输出如下图
+```
+
+[图12]
+
+* 从输出结果看出，该数据框有6行4列，每一个行索引分别是6天的日期，列标签分别是A、B、C、D。
+
+#### 行切片
+
+* 和索引方式类似，行切片有三种方式：
+  * **df["indexA" : "indexB" : step]**
+  * **df.loc["indexA" : "indexB" : step]**
+  * **df.iloc[start : end : step]**
+* 请注意上述的中括号内的内容 ":" 也遵循列表索引中的省略规则。
+
+```python
+df["2019-01-01": "2019-01-03"]
+df.loc["2019-01-01": "2019-01-03"]
+df.iloc[0: 3] # 这三种方式结果是一样的，输出如下图
+```
+
+[图13]
+
+#### 列切片
+
+* 列切片有两种方法：
+  * **df.loc[:, "columnA" : "columnB" : step]**
+  * **df.iloc[:, start : end : step]**
+
+```python
+df
+df.loc[:, 'A':'C']
+df.iloc[:, 0:3] # 这两种方法结果是一样的，输出如下图
+# ! df[:, 'A':'C'] 这样写是错误的，没有这种切片方法
+```
+
+[图14]
+
+#### 同时切片或分散取值
+
+* 行列可以同时进行线性切片，或者分散取值，下面分绝对索引和相对索引两种方式做总结：
+  * 绝对索引：只能做行列同时切片、行切片 + 列分散取值。格式为：
+    * 行列同时切片：**df.loc["indexA" : "indexB" : step1, "columnA" : "columnB" : step2]**
+    * 行切片 + 列分散取值：**df.loc["indexA" : "indexB" : step, ["columnA", "columnB", ...]]**
+  * 相对索引：能做行列同时切片、同时分散取值、行切片 + 列分散取值、行分散取值 + 列切片。格式为：
+    * 行列同时切片：**df.iloc[start1 : end1 : step1, start2 : end2 : step2]**
+    * 行列同时分散取值：**df.iloc[ [num1, num2, ...], [num1, num2, ...] ]**
+    * 行切片 + 列分散取值：**df.iloc[start : end : step, [num1, num2, ...] ]**
+    * 行分散取值 + 列切片：**df.iloc[ [num1, num2, ...], start : end : step ]**
+
+* 可以将上面的结论简要记忆为：**绝对索引不允许行分散取值**。
+* 下面用三个小例子来说明：
+* 行列同时切片：
+
+```python
+df.loc["2019-01-02": "2019-01-03", "C":"D"]
+df.iloc[1: 3, 2:] # 这两种方法结果是一样的，输出如下图
+```
+
+[图15]
+
+* 行切片，列分散取值：
+
+```python
+df.loc[df.loc["2019-01-04": "2019-01-06", ["A", "C"]]]
+df.iloc[3:, [0, 2]] # 这两种方法结果是一样的，输出如下图
+```
+
+[图16]
+
+* 行分散取值，列切片：
+
+```python
+# ! df.loc[["2019-01-02", "2019-01-06"], "C": "D"] 对绝对索引，行不能分散取值
+df.iloc[[1, 5], 0: 3] # 输出如下图
+```
+
+[图17]
+
+* 行列均分散取值：
+
+```python
+# df.loc[["2019-01-04", "2019-01-06"], ["A", "D"]] 对绝对索引，行不能分散取值
+df.iloc[[1, 5], [0, 3]] # 输出如下图
+```
+
+[图18]
+
+
+
