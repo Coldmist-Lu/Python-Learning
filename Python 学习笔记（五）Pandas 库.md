@@ -207,9 +207,9 @@ pd.DataFrame(population) # 结果如图1
 pd.DataFrame(population, columns=["population"]) # 增设columns列标签，结果如图2
 ```
 
-![图片5-1](图片5-1.png)
+![pd1](python_pandas_pic/pd1.png)
 
-![图片5-2](图片5-2.png)
+![pd2](python_pandas_pic/pd2.png)
 
 * 图中，增设 columns 参数可改变列的名字，即标签。
 * 一般这种方法用于将 Series 对象转化为 DataFrame 对象。
@@ -235,7 +235,7 @@ pd.DataFrame({"population": population,
               "GDP": GDP}) # data参数是一个字典，而字典的每个键对应的是columns，值对应的是Series对象。 
 ```
 
-![pd3](pandas 笔记图片/pd3.png)
+![pd3](python_pandas_pic/pd3.png)
 
 * DataFrame 的这种创建方式依然支持广播机制：
 
@@ -246,7 +246,7 @@ pd.DataFrame({"population": population,
               "country": "China"}) # country值会自动填充到每一行
 ```
 
-![pd4](pandas 笔记图片/pd4.png)
+![pd4](python_pandas_pic/pd4.png)
 
 #### data = "dict list"
 
@@ -258,7 +258,7 @@ data # [{'a': 0, 'b': 0}, {'a': 1, 'b': 2}, {'a': 2, 'b': 4}]
 data = pd.DataFrame(data)
 ```
 
-![pd5](pandas 笔记图片/pd5.png)
+![pd5](python_pandas_pic/pd5.png)
 
 * data 是一个字典构成的列表，可以直接作为 data 参数传入 DataFrame 创建。
 
@@ -283,7 +283,7 @@ data = [{'a':1, 'b':1}, {'b':3, 'c':4}]
 pd.DataFrame(data)
 ```
 
-![pd6](pandas 笔记图片/pd6.png)
+![pd6](python_pandas_pic/pd6.png)
 
 #### data = ndarray
 
@@ -294,7 +294,7 @@ data = np.random.randint(10, size=(3, 2))
 pd.DataFrame(data, columns=['foo', 'bar'], index=['a', 'b', 'c'])
 ```
 
-![pd7](pandas 笔记图片/pd7.png)
+![pd7](python_pandas_pic/pd7.png)
 
 
 
@@ -309,7 +309,7 @@ df = pd.DataFrame({"pop": population, "GDP": GDP})
 df
 ```
 
-![pd8](pandas 笔记图片/pd8.png)
+![pd8](python_pandas_pic/pd8.png)
 
 #### dataframe -> numpy
 
@@ -365,7 +365,7 @@ df.size # 8
 
 #### datatypes
 
-* df.dtypes 返回每列数据的数据类型
+* **df.dtypes** 返回每列数据的数据类型
 
 ```python
 df.dtypes
@@ -387,7 +387,7 @@ df = pd.DataFrame({"pop": population, "GDP": GDP})
 df
 ```
 
-![pd9](pandas 笔记图片/pd9.png)
+![pd9](python_pandas_pic/pd9.png)
 
 * 需要注意的是，索引的结果大多都是**视图**而非副本，所以在索引结果上进行修改会影响到原 DataFrame 的数据！
 
@@ -419,7 +419,7 @@ Name: GDP, dtype: int64
 """
 ```
 
-[图10]
+![pd10](python_pandas_pic/pd10.png)
 
 #### 获取行
 
@@ -439,7 +439,7 @@ df.loc[['BeiJing', 'HangZhou']] # 绝对索引
 df.iloc[[0, 3]] # 相对索引，这两行返回结果完全相同，如下图
 ```
 
-[图11]
+![pd11](python_pandas_pic/pd11.png)
 
 #### 获取表中一个值（标量）
 
@@ -489,7 +489,7 @@ df = pd.DataFrame(np.random.randn(6,4), index=dates, columns=["A", "B", "C", "D"
 df # 输出如下图
 ```
 
-[图12]
+![pd12](python_pandas_pic/pd12.png)
 
 * 从输出结果看出，该数据框有6行4列，每一个行索引分别是6天的日期，列标签分别是A、B、C、D。
 
@@ -507,7 +507,7 @@ df.loc["2019-01-01": "2019-01-03"]
 df.iloc[0: 3] # 这三种方式结果是一样的，输出如下图
 ```
 
-[图13]
+![pd13](python_pandas_pic/pd13.png)
 
 #### 列切片
 
@@ -522,7 +522,7 @@ df.iloc[:, 0:3] # 这两种方法结果是一样的，输出如下图
 # ! df[:, 'A':'C'] 这样写是错误的，没有这种切片方法
 ```
 
-[图14]
+![pd14](python_pandas_pic/pd14.png)
 
 #### 同时切片或分散取值
 
@@ -545,7 +545,7 @@ df.loc["2019-01-02": "2019-01-03", "C":"D"]
 df.iloc[1: 3, 2:] # 这两种方法结果是一样的，输出如下图
 ```
 
-[图15]
+![pd15](python_pandas_pic/pd15.png)
 
 * 行切片，列分散取值：
 
@@ -554,7 +554,7 @@ df.loc[df.loc["2019-01-04": "2019-01-06", ["A", "C"]]]
 df.iloc[3:, [0, 2]] # 这两种方法结果是一样的，输出如下图
 ```
 
-[图16]
+![pd16](python_pandas_pic/pd16.png)
 
 * 行分散取值，列切片：
 
@@ -563,7 +563,7 @@ df.iloc[3:, [0, 2]] # 这两种方法结果是一样的，输出如下图
 df.iloc[[1, 5], 0: 3] # 输出如下图
 ```
 
-[图17]
+![pd17](python_pandas_pic/pd17.png)
 
 * 行列均分散取值：
 
@@ -572,7 +572,166 @@ df.iloc[[1, 5], 0: 3] # 输出如下图
 df.iloc[[1, 5], [0, 3]] # 输出如下图
 ```
 
-[图18]
+![pd18](python_pandas_pic/pd18.png)
 
 
 
+### 布尔索引
+
+* 本节将基于切片那个例子进行介绍：
+
+```python
+dates = pd.date_range(start='2019-01-01', periods=6)
+dates
+"""
+DatetimeIndex(['2019-01-01', '2019-01-02', '2019-01-03', '2019-01-04',
+               '2019-01-05', '2019-01-06'],
+              dtype='datetime64[ns]', freq='D')
+"""
+df = pd.DataFrame(np.random.randn(6,4), index=dates, columns=["A", "B", "C", "D"])
+df # 输出如下图
+```
+
+![pd19](python_pandas_pic/pd19.png)
+
+#### 利用布尔运算进行数据筛选
+
+* 本节以 ">0" 运算来做说明：
+* **df > 0** 返回一个相同尺寸的 DataFrame，符合条件的值为 True，不符合的为 False。
+* **df[df > 0]** 返回一个相同尺寸的 DataFrame，对中括号内的布尔运算，符合条件的值不变，不符合条件的值改为 NaN。
+* **df.A > 0** 返回一个 Series 对象，其 index 就是数据框的索引，data 是对每个元素进行布尔运算后的结果（True or False）。
+* **df[df.A > 0]** 根据中括号内的 True 元素筛选行，将符合条件的行重新组成一个 DataFrame 返回。
+
+```python
+df > 0
+# 下图1
+df[df > 0]
+# 下图2
+df.A > 0
+"""
+2019-01-01     True
+2019-01-02    False
+2019-01-03    False
+2019-01-04    False
+2019-01-05    False
+2019-01-06     True
+Freq: D, Name: A, dtype: bool
+"""
+df[df.A > 0]
+# 下图3
+```
+
+![pd20](python_pandas_pic/pd20.png)
+
+![pd21](python_pandas_pic/pd21.png)
+
+![pd22](python_pandas_pic/pd22.png)
+
+#### isin() 方法
+
+* **isin()** 方法也可以用于筛选出所需的行。
+* 在原例子的基础上增加一个新列来说明这个问题：
+
+```python
+df2 = df.copy()
+df2['E'] = ['one', 'two', 'three', 'four', 'five', 'six']
+df2 # 输出如下图
+```
+
+![pd23](python_pandas_pic/pd23.png)
+
+* 下面使用 isin() 方法来筛选数据：
+
+```python
+ind = df2['E'].isin(['two', 'four'])
+ind
+"""
+2019-01-01    False
+2019-01-02     True
+2019-01-03    False
+2019-01-04     True
+2019-01-05    False
+2019-01-06    False
+Freq: D, Name: E, dtype: bool
+"""
+df2[ind] # 输出如下图
+```
+
+![pd24](python_pandas_pic/pd24.png)
+
+
+
+### 赋值
+
+* 本节将集中讲解如何对 DataFrame 的进行增添新列、修改某个值、修改某一行以及修改 index 和 columns 的方法。
+
+#### 增加行、列
+
+* 新列和新行写法较简单，我们仅对新列的添加做一展示：
+* **df['newcolumn'] = 新列**
+* **df.loc['newindex'] = 新行**
+
+```python
+s1 = pd.Series([1, 2, 3, 4, 5, 6], index=pd.date_range('20190101', periods=6))
+s1
+"""
+2019-01-01    1
+2019-01-02    2
+2019-01-03    3
+2019-01-04    4
+2019-01-05    5
+2019-01-06    6
+Freq: D, dtype: int64
+"""
+df['E'] = s1 # 用list、numpy数组也可以
+df # 输出如下图
+```
+
+![pd25](python_pandas_pic/pd25.png)
+
+#### 修改赋值
+
+* 需要修改一个值的时候，可以使用绝对索引和相对索引两种方式：
+  * **df.loc['index', 'column'] = newvalue**
+  * **df.iloc[a, b] = newvalue**
+
+```python
+df.loc['2019-01-01', 'A'] = 0
+df.iloc[0, 1] = 0
+df # 输出如下图
+```
+
+![pd26](python_pandas_pic/pd26.png)
+
+#### 修改某一行或某一列
+
+* 有时想批量修改某一行或某一列的值，可以采用如下方法：（和增加元素差不多）
+  * **df['column'] = 修改列**
+  * **df.loc['index'] = 修改行**
+* 需要注意，如果要改成相同元素，那么可以使用广播机制，在修改列（或修改行）输入一个标量就可以。
+
+```python
+df["D"] = np.array([5]*len(df))   # 可简化成df["D"] = 5
+df.loc["2019-01-03"] = np.array([4]*df.shape[1]) # 可简化成df.loc["2019-01-03"] = 4
+df # 输出如下图
+```
+
+![pd27](python_pandas_pic/pd27.png)
+
+#### 修改 index 和 columns
+
+* 修改 index 和 columns 也非常容易：
+  * **df.index = 修改的 index**
+  * **df.columns = 修改的 columns**
+
+```python
+df.index = [i for i in range(len(df))]
+df.columns = [i for i in range(df.shape[1])]
+df # 输出如下图
+```
+
+![pd28](python_pandas_pic/pd28.png)
+
+
+
+## 数值计算与统计分析
