@@ -582,17 +582,16 @@ df.iloc[[1, 5], [0, 3]] # 输出如下图
 
 ```python
 dates = pd.date_range(start='2019-01-01', periods=6)
-dates
-"""
-DatetimeIndex(['2019-01-01', '2019-01-02', '2019-01-03', '2019-01-04',
-               '2019-01-05', '2019-01-06'],
-              dtype='datetime64[ns]', freq='D')
-"""
 df = pd.DataFrame(np.random.randn(6,4), index=dates, columns=["A", "B", "C", "D"])
 df # 输出如下图
 ```
 
 ![pd19](python_pandas_pic/pd19.png)
+
+#### NaN 值
+
+* 介绍布尔运算之前，我们需要介绍一个重要的量，就是 NaN。
+* NaN 的全称是 not a number，用于表示未定义或不可表示的值。
 
 #### 利用布尔运算进行数据筛选
 
@@ -664,6 +663,7 @@ df2[ind] # 输出如下图
 ### 赋值
 
 * 本节将集中讲解如何对 DataFrame 的进行增添新列、修改某个值、修改某一行以及修改 index 和 columns 的方法。
+* 本节内容继续沿用上节的例子介绍。
 
 #### 增加行、列
 
@@ -735,3 +735,553 @@ df # 输出如下图
 
 
 ## 数值计算与统计分析
+
+### 查看数据
+
+* 本节内容依然以上面的例子为基础介绍：
+
+```python
+dates = pd.date_range(start='2019-01-01', periods=6)
+df = pd.DataFrame(np.random.randn(6,4), index=dates, columns=["A", "B", "C", "D"])
+df # 输出如下图
+```
+
+* 由于这部分内容和上面的不是在一天完成，因此随机数产生的结果会不一致。但这不影响后面的内容介绍。
+
+#### 查看几行数据
+
+* 当数据量过大时，我们常常会采用查看几行的方式来观察数据。
+* **df.head(n)** 该方法可显示 DataFrame 的前 n 行数据。若 n 不给出，则显示前 5 行数据。
+* **df.tail(n)** 该方法可显示 DataFrame 的后 n 行数据。若 n 不给出，则显示后 5 行数据。
+
+```python
+df.head() # 查看前5行，输出如图1
+df.tail(3) # 查看后3行，输出如图2
+```
+
+![pd29](python_pandas_pic/pd29.png)
+
+![pd30](python_pandas_pic/pd30.png)
+
+#### 查看基本信息
+
+* 为了描述基本信息的特征，我们先微调一下该 DataFrame：
+* 同时介绍一下，**np.nan** 可以得到 NaN 值。
+
+```python
+df.iloc[0, 3] = np.nan
+df
+```
+
+![pd31](python_pandas_pic/pd31.png)
+
+* **df.info()** 方法可以查看该 DataFrame 的基本信息。
+
+```python
+df.info()
+"""
+<class 'pandas.core.frame.DataFrame'>
+DatetimeIndex: 6 entries, 2019-01-01 to 2019-01-06
+Freq: D
+Data columns (total 4 columns):
+A    6 non-null float64
+B    6 non-null float64
+C    6 non-null float64
+D    5 non-null float64
+dtypes: float64(4)
+memory usage: 240.0 bytes
+"""
+```
+
+* 可以看出，基本信息中显示了行和列的主要信息，以及每一列有多少有效数据（不包括NaN）
+
+
+
+### 数值计算
+
+* 由于 DataFrame 是从 numpy 数组继承而来的，因此保留了很多 numpy 中的运算特性。
+* 许多 numpy 中的运算方法都适用于 DataFrame。
+
+#### 向量化运算
+
+* 本节内容基于以下两个向量：
+
+```python
+x = pd.DataFrame(np.arange(4).reshape(1, 4))
+y = pd.DataFrame(np.arange(4,8).reshape(1, 4))
+x # 如图1
+y # 如图2
+```
+
+![pd32](python_pandas_pic/pd32.png)
+
+![pd33](python_pandas_pic/pd33.png)
+
+* 下面展示几种向量运算方法：
+
+```python
+x + 5 # 结果如图1
+np.exp(x) # 结果如图2
+x * y # 结果如图3
+```
+
+![pd34](python_pandas_pic/pd34.png)
+
+![pd35](python_pandas_pic/pd35.png)
+
+![pd36](python_pandas_pic/pd36.png)
+
+#### 矩阵化运算
+
+* 本节内容基于以下两个矩阵：
+
+```python
+x = pd.DataFrame(np.random.randint(10, size=(5, 5)))
+y = pd.DataFrame(np.random.randint(10, size=(5, 5)))
+x # 如图1
+y # 如图2
+```
+
+![pd37](python_pandas_pic/pd37.png)
+
+![pd38](python_pandas_pic/pd38.png)
+
+* 下面展示几种矩阵运算方法：
+
+```python
+x = x.T # 转置，结果如图1
+x.dot(y) # 乘法运算，结果如图2
+```
+
+![pd39](python_pandas_pic/pd39.png)
+
+![pd40](python_pandas_pic/pd40.png)
+
+* 对于相同运算的执行，DataFrame 的计算速度会比 numpy 要稍慢一些，但仍在同一数量级上，这说明 DataFrame 记录了更多的数据信息，因此运算时需要稍大一些的开销；而直接使用 for 循环计算速度会非常慢，与 numpy 和 DataFrame 不在同一数量级上。
+* 从这一角度也可以看出，numpy 更侧重于计算， pandas 更侧重于数据处理。
+
+#### 广播运算
+
+* 广播机制将基于以下的 DataFrame：
+
+```python
+x = pd.DataFrame(np.random.randint(10, size=(3, 3)), columns=list("ABC"))
+x
+```
+
+![pd41](python_pandas_pic/pd41.png)
+
+* 按行广播：下面的例子，取出了第一行，将数据与第一行数据相除。
+
+```python
+x.iloc[0]
+"""
+A    6
+B    3
+C    7
+Name: 0, dtype: int32
+"""
+x / x.iloc[0] # 结果如下图，下面展示的是运算过程。
+x.div(x.iloc[0], axis=1) # 这一方法也能得到一样的结果。axis=1指的是按行。
+"""
+6 / 6    3 / 3    7 / 7
+4 / 6    6 / 3    9 / 7
+2 / 6    6 / 3    7 / 7
+"""
+```
+
+![pd42](python_pandas_pic/pd42.png)
+
+* 按列广播：下面的例子取出了A列，然后将数据与A列相除。
+
+```python
+x.A
+"""
+0    6
+1    4
+2    2
+Name: A, dtype: int32
+"""
+x.div(x.A, axis=0) # 结果如下图，下面展示的是运算过程。
+"""
+6 / 6    3 / 6    7 / 6
+4 / 4    6 / 4    9 / 4
+2 / 2    6 / 2    7 / 2
+"""
+```
+
+![pd43](python_pandas_pic/pd43.png)
+
+#### 索引对齐（新的用法）
+
+* 本节主要讨论 pandas 库的新用法：索引对齐机制。本节将基于下面的数据框：
+
+```python
+A = pd.DataFrame(np.random.randint(0, 20, size=(2, 2)), columns=list("AB"))
+B = pd.DataFrame(np.random.randint(0, 10, size=(3, 3)), columns=list("ABC"))
+A # 如下图1
+B # 如下图2
+```
+
+![pd44](python_pandas_pic/pd44.png)
+
+![pd45](python_pandas_pic/pd45.png)
+
+* 将两个尺寸不同的对象运算时，pandas 会自动对齐两个对象的索引，缺少的值用 NaN 表示；
+  * 增加缺省值 fill_value 时，会将 NaN 值替换为 fill_value。
+
+```python
+A + B # 结果如下图1
+A * B # 结果如下图2
+A.add(B, fill_value = 0) # 结果如下图3
+```
+
+![pd46](python_pandas_pic/pd46.png)
+
+![pd47](python_pandas_pic/pd47.png)
+
+![pd48](python_pandas_pic/pd48.png)
+
+
+
+### 统计分析
+
+#### 数据各个种类统计
+
+* 这里我们介绍两种方法，一种是使用 ndarray 进行统计的方法，需要用到之前的 Counter 函数；第二种方法是直接采用 DataFrame 中的函数进行计算。
+
+* 方法1：运用计数器 Counter 统计数据
+
+```python
+x = np.random.randint(3, size=20)
+x # array([0, 0, 2, 1, 0, 1, 1, 1, 0, 1, 0, 1, 2, 2, 0, 2, 2, 1, 0, 1])
+# 可以用 np.unique(x) 来查看 x 有哪些元素组成：array([0, 1, 2])
+from collections import Counter
+Counter(x)
+# Counter({0: 7, 2: 5, 1: 8})
+```
+
+* 方法2：运用 **df.value_counts()** 统计数据
+
+```python
+x1 = pd.DataFrame(x, columns = ['A'])
+x1['A'].value_counts()
+"""
+1    8
+0    7
+2    5
+Name: A, dtype: int64
+"""
+```
+
+#### 按列排序
+
+* 本节我们继续使用一开始的例子，并增加一个 "per_GDP" 列：
+
+```python
+population_dict = {"BeiJing": 2154,
+                   "ShangHai": 2424,
+                   "ShenZhen": 1303,
+                   "HangZhou": 981 }
+population = pd.Series(population_dict) 
+
+GDP_dict = {"BeiJing": 30320,
+            "ShangHai": 32680,
+            "ShenZhen": 24222,
+            "HangZhou": 13468 }
+GDP = pd.Series(GDP_dict)
+
+city_info = pd.DataFrame({"population": population,"GDP": GDP})
+city_info["per_GDP"] = city_info["GDP"]/city_info["population"]
+city_info
+```
+
+![pd49](python_pandas_pic/pd49.png)
+
+* **df.sort_values(by, ascending)** 可以实现按照某个列进行排序：
+  * by：提供按照哪个列进行排序；
+  * ascending：提供使用升序或降序，默认升序。
+
+```python
+city_info.sort_values(by='per_GDP') # 输出如图1
+city_info.sort_values(by='per_GDP', ascending=False) # 输出如图2
+```
+
+![pd50](python_pandas_pic/pd50.png)
+
+![pd51](python_pandas_pic/pd51.png)
+
+#### 按索引排序（按轴排序）
+
+* 本节将使用以下的例子：
+
+```python
+df = pd.DataFrame(np.random.randint(20, size=(3, 4)), index=[2, 1, 0], columns=list("CBAD"))
+df
+```
+
+![pd52](python_pandas_pic/pd52.png)
+
+* **df.sort_index(axis, ascending)** 该方法可实现按照索引（或列名）排序
+  * axis：按照哪个轴进行排序；
+  * ascending：提供使用升序或降序，默认升序。
+
+```python
+df.sort_index() # 按行索引进行升序排序，输出如下图1
+df.sort_index(axis=1) # 按列标签进行升序排序，输出如下图2
+df.sort_index(axis=1, ascending=False) # 按列标签进行降序排序，输出如下图3
+```
+
+![pd53](python_pandas_pic/pd53.png)
+
+![pd54](python_pandas_pic/pd54.png)
+
+![pd55](python_pandas_pic/pd55.png)
+
+#### 常见统计量计算
+
+* 本节以及后面的多节将使用以下的例子：
+
+```python
+df = pd.DataFrame(np.random.normal(2, 4, size=(6, 4)),columns=list("ABCD"))
+df
+```
+
+![pd56](python_pandas_pic/pd56.png)
+
+* 注意：多数方法都可以用 axis 来更换行列。
+
+* **df.count()** 求非空个数
+* **df.sum()** 求和
+* **df.min()** 最小值 **df.idmin()** 最小值索引位置
+* **df.max()** 最大值 **df.idmax()** 最大值索引位置
+
+```python
+df.count()
+"""
+A    6
+B    6
+C    6
+D    6
+dtype: int64
+"""
+```
+
+```python
+df.sum()
+"""
+A     9.582697
+B    28.781952
+C     9.480388
+D    23.085391
+dtype: float64
+"""
+df.sum(axis=1)
+"""
+0    22.891925
+1    17.807988
+2    -0.580801
+3    -2.710142
+4    17.921577
+5    15.599881
+dtype: float64
+"""
+```
+
+```python
+df.min()
+"""
+A   -4.039829
+B    0.898796
+C   -4.252267
+D   -1.182524
+dtype: float64
+"""
+df.max(axis=1)
+"""
+0    12.624040
+1     8.567084
+2     4.886010
+3     1.825853
+4     5.722338
+5     6.659075
+dtype: float64
+"""
+df.idxmax()
+"""
+A    4
+B    1
+C    0
+D    0
+dtype: int64
+"""
+```
+
+* **df.mean()** 均值
+* **df.var()** 方差
+* **df.std()** 标准差
+* **df.median()** 中位数
+* **df.mode()** 众数
+* **df.quantile()** 分位数
+
+```python
+df.mean()
+"""
+A    1.597116
+B    4.796992
+C    1.580065
+D    3.847565
+dtype: float64
+"""
+```
+
+```python
+df.var()
+"""
+A    14.137660
+B     7.322950
+C    14.188574
+D    25.808212
+dtype: float64
+"""
+```
+
+```python
+df.std()
+"""
+A    3.760008
+B    2.706095
+C    3.766772
+D    5.080178
+dtype: float64
+"""
+```
+
+```python
+df.median()
+"""
+A    2.439898
+B    4.798540
+C    2.585222
+D    2.519051
+dtype: float64
+"""
+```
+
+```python
+data = pd.DataFrame(np.random.randint(5, size=(10, 2)), columns=list("AB"))
+data # 输出如下图1
+data.mode() # 输出如下图2
+```
+
+![pd57](python_pandas_pic/pd57.png)
+
+![pd58](python_pandas_pic/pd58.png)
+
+```python
+df.quantile(0.75)
+"""
+A    4.250340
+B    6.287380
+C    4.556137
+D    5.667908
+Name: 0.75, dtype: float64
+"""
+```
+
+#### 描述所有统计量
+
+* **df.describe()** 描述所有统计量：
+  * 对于数字类型的 DataFrame，包括数量、平均数、标准差、最小值、25%、50%、75%分位数、最大最小值。
+  * 对于字符串类型的 DataFrame，包括数量、统计种类、最频繁的数和频率。
+
+```python
+df
+df.describe() # 输出如下图1
+df_2 = pd.DataFrame([["a", "a", "c", "d"],
+                       ["c", "a", "c", "b"],
+                       ["a", "a", "d", "c"]], columns=list("ABCD"))
+df_2 # 输出如下图2
+df_2.describe() # 输出如下图3
+```
+
+![pd59](python_pandas_pic/pd59.png)
+
+![pd60](python_pandas_pic/pd60.png)
+
+![pd61](python_pandas_pic/pd61.png)
+
+#### 相关性系数和协方差
+
+* **df.corr()** 返回相关系数组成的 DataFrame
+* **df.corrwith()** 返回协方差
+
+```python
+df.corr() # 输出如下图
+df.corrwith(df['A'])
+"""
+A    1.000000
+B    0.831063
+C    0.331060
+D    0.510821
+dtype: float64
+"""
+```
+
+![pd62](python_pandas_pic/pd62.png)
+
+#### 自定义输出
+
+* **df.apply(method)** 使用method方法实现自定义输出，默认对每一列进行相应的操作。
+
+* 下面用一些例子来说明：
+
+```python
+df # 原DataFrame，输出如下图
+```
+
+![pd63](python_pandas_pic/pd63.png)
+
+```python
+df.apply(np.cumsum) # 输出如下图1
+# 该句可以写成：df.cumsum()
+df.apply(np.cumsum, axis=1) # 输出如下图2
+# 该句可以写成：df.cumsum(axis=1)
+```
+
+![pd64](python_pandas_pic/pd64.png)
+
+![pd65](python_pandas_pic/pd65.png)
+
+```python
+df.apply(sum)
+# 该句可以写成：df.sum()
+"""
+A     9.582697
+B    28.781952
+C     9.480388
+D    23.085391
+dtype: float64
+"""
+```
+
+```python
+df.apply(lambda x: x.max()-x.min())
+"""
+A     9.762167
+B     7.668288
+C     9.394396
+D    13.806564
+dtype: float64
+"""
+```
+
+```python
+def my_describe(x):
+    return pd.Series([x.count(), x.mean(), x.max(), x.idxmin(), x.std()], \
+                     index=["Count", "mean", "max", "idxmin", "std"])
+df.apply(my_describe)
+```
+
+![pd66](python_pandas_pic/pd66.png)
+
