@@ -579,7 +579,7 @@ ls = [i**2 for i in range(1000000)]
         while i < n:
             ls.append(a)
             a, b = b, a+b
-            n += 1
+            i += 1
            
     fib(10) 
     ```
@@ -592,7 +592,7 @@ ls = [i**2 for i in range(1000000)]
         while i < n:
             yield a # 生成器函数
             a, b = b, a+b
-            n += 1
+            i += 1
            
     for a in fib(10):
         print(a, end = ' ')

@@ -1285,3 +1285,437 @@ df.apply(my_describe)
 
 ![pd66](python_pandas_pic/pd66.png)
 
+
+
+## 缺失值处理
+
+### 检测
+
+* **df.isnull()**
+* **df.notnull()**
+* 上述两个方法都会返回一个布尔类型的 DataFrame，isnull 函数对空值为 True，notnull 函数对非空值为 True。
+* 注意，None 也是空值。当 DataFrame 有 None 值时，数据类型**全部**会修改为 object。NaN 是一种特殊的**浮点数**。
+* 小例子：
+
+```python
+df = pd.DataFrame(np.array([[1, np.nan, 2],
+                              [np.nan, 3, 4],
+                              [5, 6, None]]), columns=["A", "B", "C"])
+df
+```
+
+![pd67](python_pandas_pic/pd67.png)
+
+```python
+df.isnull() # 输出如图1
+df.notnull() # 输出如图2
+```
+
+![pd68](python_pandas_pic/pd68.png)
+
+![pd69](python_pandas_pic/pd69.png)
+
+
+
+### 删除
+
+* 本节基于以下的例子：
+
+```python
+df = pd.DataFrame(np.array([[1, np.nan, 2, 3],
+                              [np.nan, 4, 5, 6],
+                              [7, 8, np.nan, 9],
+                              [10, 11 , 12, 13]]), columns=["A", "B", "C", "D"])
+df
+```
+
+![pd70](python_pandas_pic/pd70.png)
+
+* df.dropna( axis, how ) 行列删除语句
+  * axis：设定删除轴。默认为行。axis=1 (或 axis="columns" )时删除列。
+  * how：指定删除方式。how="any" 时只要有空值就删除，how="all" 时只删除全部为空值的行（列）。默认为 any。
+* 例1：
+
+```python
+df.dropna() # 删除有空值的行 输出如图1
+df.dropna(axis="columns") # 删除有空值的列 也可以写成axis=1 输出如图2
+```
+
+![pd71](python_pandas_pic/pd71.png)
+
+![pd72](python_pandas_pic/pd72.png)
+
+* 例2：
+
+```python
+df["D"] = np.nan
+df # 输出如图1
+df.dropna(axis="columns", how="all") # 输出如图2
+df.dropna(axis="columns", how="any") # 输出如图3
+```
+
+![pd73](python_pandas_pic/pd73.png)
+
+![pd74](python_pandas_pic/pd74.png)
+
+![pd75](python_pandas_pic/pd75.png)
+
+
+
+### 填充
+
+* **df.fillna(value)** 该方法对缺失值进行填充。
+* 不仅可以只填充一个量，也可以按照自定的值进行填充。用下面的例子加以解释：
+
+```python
+df = pd.DataFrame(np.array([[1, np.nan, 2, 3],
+                              [np.nan, 4, 5, 6],
+                              [7, 8, np.nan, 9],
+                              [10, 11 , 12, 13]]), columns=["A", "B", "C", "D"])
+df
+```
+
+![pd76](python_pandas_pic/pd76.png)
+
+#### 固定值填充
+
+```python
+df.fillna(value=5) # 输出如下图
+```
+
+![pd77](python_pandas_pic/pd77.png)
+
+#### 均值填充
+
+```python
+fill = df.mean()
+fill
+"""
+A    6.000000
+B    7.666667
+C    6.333333
+D    7.750000
+dtype: float64
+"""
+df.fillna(value=fill) # 输出如下图
+```
+
+![pd78](python_pandas_pic/pd78.png)
+
+#### 全局均值填充
+
+```python
+fill = df.stack().mean()
+fill # 7.0
+df.fillna(value=fill) # 输出如下图
+```
+
+![pd79](python_pandas_pic/pd79.png)
+
+
+
+## 合并数据
+
+* 为了更好地表示 DataFrame 的形态，本节采用以下的函数构造 DataFrame：
+
+```python
+def make_df(cols, ind):
+    "一个简单的DataFrame"
+    data = {c: [str(c)+str(i) for i in ind]  for c in cols}
+    return pd.DataFrame(data, ind)
+
+make_df("ABC", range(3)) # 输出如下图
+```
+
+![pd80](python_pandas_pic/pd80.png)
+
+### 垂直合并与水平合并
+
+* **pd.concat([a, b, ...], axis, ignore_index)** 该函数用于对数据进行合并。注意这是一个**函数**而不是方法。
+  * axis：设定合并轴，即按水平合并或垂直合并。
+  * ignore_index：设定是否忽略索引。
+
+#### 垂直合并
+
+```python
+df_1 = make_df("AB", [1, 2])
+df_2 = make_df("AB", [3, 4])
+df_1 # 输出如下图1
+df_2 # 输出如下图2
+pd.concat([df_1, df_2]) # 输出如下图3
+```
+
+![pd81](python_pandas_pic/pd81.png)
+
+![pd82](python_pandas_pic/pd82.png)
+
+![pd83](python_pandas_pic/pd83.png)
+
+#### 水平合并
+
+```python
+df_1 = make_df("AB", [0, 1])
+df_2 = make_df("CD", [0, 1])
+df_1 # 输出如下图1
+df_2 # 输出如下图2
+pd.concat([df_1, df_2], axis=1) # 输出如下图3
+```
+
+![pd84](python_pandas_pic/pd84.png)
+
+![pd85](python_pandas_pic/pd85.png)
+
+![pd86](python_pandas_pic/pd86.png)
+
+#### 索引重叠的问题
+
+* 两个数据框在合并的时候经常会产生索引重叠的问题。此时需要调用 ignore_index 来重设索引。
+* 垂直合并的例子（行重叠）：
+
+```python
+df_1 = make_df("AB", [1, 2])
+df_2 = make_df("AB", [1, 2])
+pd.concat([df_5, df_6]) # 输出如下图1
+pd.concat([df_5, df_6], ignore_index=True) # 输出如下图2
+```
+
+![pd87](python_pandas_pic/pd87.png)
+
+![pd88](python_pandas_pic/pd88.png)
+
+* 水平合并的例子（列重叠）：
+
+```python
+df_1 = make_df("ABC", [1, 2])
+df_2 = make_df("BCD", [1, 2])
+pd.concat([df_1, df_2], axis=1) # 输出如下图1
+pd.concat([df_1, df_2], axis=1, ignore_index=True) # 输出如下图2
+```
+
+![pd89](python_pandas_pic/pd89.png)
+
+![pd90](python_pandas_pic/pd90.png)
+
+
+
+### 对齐合并
+
+#### 合并原理
+
+* **pd.merge(a, b)** 将两个 DataFrame 根据相同列相同元素进行匹配合并。
+
+```python
+df_1 = make_df("AB", [1, 2])
+df_2 = make_df("BC", [1, 2])
+df_1 # 如下图1
+df_2 # 如下图2
+pd.merge(df_1, df_2) # 如下图3
+```
+
+![pd91](python_pandas_pic/pd91.png)
+
+![pd92](python_pandas_pic/pd92.png)
+
+![pd93](python_pandas_pic/pd93.png)
+
+* 上例有相同的 B 列，根据 B 列的 B1 和 B2 元素进行匹配来合并 A 列和 C 列。
+
+```python
+df_1 = make_df("AB", [1, 2])
+df_2 = make_df("CB", [2, 1])
+df_1 # 如下图1
+df_2 # 如下图2
+pd.merge(df_1, df_2) # 如下图3
+```
+
+![pd94](python_pandas_pic/pd94.png)
+
+![pd95](python_pandas_pic/pd95.png)
+
+![pd96](python_pandas_pic/pd96.png)
+
+* 上例有相同的 B 列，虽然 B 列的元素顺序不同，但依然可以实现合并。
+
+#### 例：城市合并信息
+
+* 城市人口信息：
+
+```python
+population_dict = {"city": ("BeiJing", "HangZhou", "ShenZhen"),
+                   "pop": (2154, 981, 1303)}
+population = pd.DataFrame(population_dict)
+population
+```
+
+![pd97](python_pandas_pic/pd97.png)
+
+* 城市GDP信息：
+
+```python
+GDP_dict = {"city": ("BeiJing", "ShangHai", "HangZhou"),
+            "GDP": (30320, 32680, 13468)}
+GDP = pd.DataFrame(GDP_dict)
+GDP
+```
+
+![pd98](python_pandas_pic/pd98.png)
+
+* 模式一：交集合并
+  * 只将 city 列中的匹配信息进行输出。
+
+```python
+city_info = pd.merge(population, GDP)
+city_info
+```
+
+![pd99](python_pandas_pic/pd99.png)
+
+* 模式二：并集合并
+  * 将两个 city 列中的所有城市信息进行输出，若有数据不存在则设为 NaN。
+
+```python
+city_info = pd.merge(population, GDP, how="outer")
+city_info
+```
+
+![pd100](python_pandas_pic/pd100.png)
+
+
+
+## 分组和数据透视表
+
+* 本节将基于以下例子：
+
+```python
+df = pd.DataFrame({"key":["A", "B", "C", "C", "B", "A"],
+                  "data1": range(6),
+                  "data2": np.random.randint(0, 10, size=6)})
+df
+```
+
+![pd101](python_pandas_pic/pd101.png)
+
+### 分组
+
+* **df.groupby("key")** 对 DataFrame 以 key 键进行分组，形成一个分组（GroupBy）对象。
+* 需要注意的是，groupby 函数得到的分组并不是已经分好的内容，而是一个用于延迟计算的对象，有点类似于。
+
+```python
+df.groupby("key")
+# <pandas.core.groupby.groupby.DataFrameGroupBy object at 0x000002446CAD1470>
+```
+
+#### 打印分组
+
+* 分组对象是一个可迭代对象，因此可以遍历：
+
+```python
+for i in df.groupby("key"):
+    print(str(i))
+"""
+('A',   key  data1  data2
+0   A      0      6
+5   A      5      1)
+('B',   key  data1  data2
+1   B      1      7
+4   B      4      0)
+('C',   key  data1  data2
+2   C      2      5
+3   C      3      1)
+"""
+```
+
+#### 基本分组处理
+
+* 直接对分组对象进行求和、求均值操作：
+
+```python
+df.groupby("key").sum() # 输出如下图1
+df.groupby("key").mean() # 输出如下图2
+```
+
+![pd102](python_pandas_pic/pd102.png)
+
+![pd103](python_pandas_pic/pd103.png)
+
+#### 按列取值
+
+* 可以选一列数据进行处理：
+
+```python
+df.groupby("key")["data2"].sum()
+"""
+key
+A    7
+B    7
+C    6
+Name: data2, dtype: int32
+"""
+```
+
+#### 按组迭代
+
+* 可以根据分组一组一组进行处理：
+
+```python
+for data, group in df.groupby("key"):
+    print(data, group) # data是组名，group是每个组的DataFrame
+    print("shape={0}".format(group.shape))
+"""
+A   key  data1  data2
+0   A      0      6
+5   A      5      1
+shape=(2, 3)
+B   key  data1  data2
+1   B      1      7
+4   B      4      0
+shape=(2, 3)
+C   key  data1  data2
+2   C      2      5
+3   C      3      1
+shape=(2, 3)
+"""
+```
+
+#### 调用方法
+
+* 调用 describe() 方法产生分组描述：
+
+```python
+df.groupby("key")["data1"].describe()
+```
+
+![pd104](python_pandas_pic/pd104.png)
+
+* 调用 aggregate() 方法产生每组每列的描述：
+
+```python
+df.groupby("key").aggregate(["min", "median", "max"])
+```
+
+![pd105](python_pandas_pic/pd105.png)
+
+#### 过滤
+
+* **df.groupby().filter(func)** 根据某个标准可以对不符合标准的组别进行过滤。
+* 下例展示了如何根据标准差进行过滤：
+
+```python
+def filter_func(x):
+    return x["data2"].std() > 3
+df.groupby("key")["data2"].std()
+"""
+key
+A    3.535534
+B    4.949747
+C    2.828427
+Name: data2, dtype: float64
+"""
+df.groupby("key").filter(filter_func)
+```
+
+![pd106](python_pandas_pic/pd106.png)
+
+#### 转换
+
+* 
