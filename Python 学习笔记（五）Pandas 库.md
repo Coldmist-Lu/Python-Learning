@@ -1638,6 +1638,50 @@ df.groupby("key").mean() # 输出如下图2
 
 ![pd103](python_pandas_pic/pd103.png)
 
+#### 键的设定
+
+* 列表、数组也可以设定为分组键。下面举一个列表的例子说明：
+
+```python
+L = [0, 1, 0, 1, 2, 0]
+df.groupby(L).sum() # 根据L设定分组
+```
+
+![pd104](python_pandas_pic/pd104.png)
+
+* 字典映射
+  * 可以通过索引将字典映射到不同的分组。举例说明：
+
+```python
+df2 = df.set_index("key")
+df2
+```
+
+![pd105](python_pandas_pic/pd105.png)
+
+```python
+mapping = {"A": "first", "B": "constant", "C": "constant"} # 将A组映射为first，B、C组映射为constant
+df2.groupby(mapping).sum()
+```
+
+![pd106](python_pandas_pic/pd106.png)
+
+* 用 Python 函数也可以建立映射：
+
+```python
+df2.groupby(str.lower).mean() # 通过lower函数将大写字母映射成小写字母
+```
+
+![pd107](python_pandas_pic/pd107.png)
+
+* 设定多个有效值组成的列表：
+
+```python
+df2.groupby([str.lower, mapping]).mean()
+```
+
+![pd108](python_pandas_pic/pd108.png)
+
 #### 按列取值
 
 * 可以选一列数据进行处理：
@@ -1685,7 +1729,7 @@ shape=(2, 3)
 df.groupby("key")["data1"].describe()
 ```
 
-![pd104](python_pandas_pic/pd104.png)
+![pd109](python_pandas_pic/pd109.png)
 
 * 调用 aggregate() 方法产生每组每列的描述：
 
@@ -1693,7 +1737,7 @@ df.groupby("key")["data1"].describe()
 df.groupby("key").aggregate(["min", "median", "max"])
 ```
 
-![pd105](python_pandas_pic/pd105.png)
+![pd110](python_pandas_pic/pd110.png)
 
 #### 过滤
 
@@ -1714,8 +1758,232 @@ Name: data2, dtype: float64
 df.groupby("key").filter(filter_func)
 ```
 
-![pd106](python_pandas_pic/pd106.png)
+![pd111](python_pandas_pic/pd111.png)
 
-#### 转换
+#### 转换（自定义方法）
 
-* 
+* **df.groupby().transform(func)**
+* **df.groupby().apply(func)**
+* 上述两个方法对 DataFrame 的内容进行计算，apply() 可以实现对某个具体函数的变换，应用范围更广。
+
+```python
+df.groupby("key").transform(lambda x: x-x.mean())
+df.groupby("key").apply(lambda x: x-x.mean()) # 两个方法的输出结果一样，如下图
+```
+
+[112]
+
+* apply 方法的另一个例子：
+
+```python
+def norm_by_data2(x):
+    x["data1"] /= x["data2"].sum()
+    return x
+df.groupby("key").apply(norm_by_data2) # 这一方法用transform就不行
+```
+
+[113]
+
+
+
+### 例：行星观测数据处理
+
+* 本节用行星观测数据处理的例子来展示分组数据分析的技巧。
+
+```python
+import seaborn as sns
+planets = sns.load_dataset("planets", engine="python") # 加入引擎否则有可能会报OSError错误
+```
+
+#### 基本描述
+
+* 查看形状：
+
+```python
+planets.shape # (1035, 6)
+```
+
+* 查看前几行：
+
+```python
+planets.head()
+```
+
+[114]
+
+* 可以看出，该数据集包括行星发现的年份、质量、距离等信息。
+* 查看数据集的描述：
+
+```python
+planets.describe()
+```
+
+[115]
+
+#### 任务
+
+* 现在我们希望描述不同decade、不同方法（method）产生的行星情况。
+* 首先，将年份信息改成10年为一界限。
+
+```python
+decade = 10 * (planets["year"] // 10)
+decade.head()
+"""
+0    2000
+1    2000
+2    2010
+3    2000
+4    2000
+Name: year, dtype: int64
+"""
+decade = decade.astype(str) + 's' # 年份信息转成字符串，并+s
+decade.name = "decade"
+decade.head()
+"""
+0    2000s
+1    2000s
+2    2010s
+3    2000s
+4    2000s
+Name: decade, dtype: object
+"""
+```
+
+* 根据 method、decade 进行分组：
+
+```python
+planets.groupby(["method", decade]).sum()
+```
+
+[116]
+
+* 现在我们单独把 number 拿出来，根据不同的 method、不同的 decade 来形成一个分组表。
+  * 下面的语句我们单独讲解一下：
+    * **[["number"]]** 这里使用两个中括号的意义是生成一个 DataFrame，否则会生成一个 Series。
+    * **.sum()** 提供了求和信息。
+    * **.unstack()** 是展开的意思，即将 method 和 decade 分别作为行和列展开成一个表。
+    * **.fillna(0)** 填充缺失值为0。
+
+```python
+planets.groupby(["method", decade])[["number"]].sum().unstack().fillna(0)
+```
+
+[117]
+
+
+
+### 数据透视表
+
+* **df.pivot_table("columns", index, columns, aggfunc, margins)** 使用数据透视表
+* 数据透视表的例子我们放在泰坦尼克号的数据处理中介绍。
+
+
+
+### 例：泰坦尼克号乘客数据分析
+
+#### 准备
+
+* 首先导入数据：
+
+```python
+import seaborn as sns
+
+titanic = sns.load_dataset("titanic", engine="python")
+```
+
+* 查看前几行：
+
+```python
+titanic.head()
+```
+
+[118]
+
+* 查看描述：
+
+```python
+titanic.describe()
+```
+
+[119]
+
+#### 统计
+
+* 对男女存活比例的统计：
+
+```python
+titanic.groupby("sex")[["survived"]].mean()
+```
+
+[120]
+
+* 分舱位进一步详细统计：
+
+```python
+titanic.groupby(["sex", "class"])["survived"].aggregate("mean").unstack()
+```
+
+[121]
+
+#### 数据透视表的使用
+
+* 上述统计方法可以直接使用数据透视表来生成：
+
+```python
+titanic.pivot_table("survived", index="sex", columns="class") # 默认aggfunc="mean"，可写可不写
+```
+
+[122]
+
+* 如果需要展示总计结果，需要添加 margins 参数：
+
+```python
+titanic.pivot_table("survived", index="sex", columns="class", aggfunc="mean", margins=True)
+```
+
+[123]
+
+* 从 fare 和 survived 两个角度统计：
+
+```python
+titanic.pivot_table(index="sex", columns="class", aggfunc={"survived": "sum", "fare": "mean"})
+```
+
+[124]
+
+
+
+## 其他内容
+
+### 多级索引：多维数据
+
+* 我们直接展示一个多级索引的例子：
+
+```python
+base_data = np.array([[1771, 11115 ],
+                      [2154, 30320],
+                      [2141, 14070],
+                      [2424, 32680],
+                      [1077, 7806],
+                      [1303, 24222],
+                      [798, 4789],
+                      [981, 13468]]) 
+data = pd.DataFrame(base_data, index=[["BeiJing","BeiJing","ShangHai","ShangHai","ShenZhen","ShenZhen","HangZhou","HangZhou"]\
+                                     , [2008, 2018]*4], columns=["population", "GDP"])
+data
+```
+
+[125]
+
+* 其实多级索引仅仅需要将索引转化为二维数组（列表）即可。
+* 添加索引名：
+
+```python
+data.index.names = ["city", "year"]
+data
+```
+
+[126]
+
+
+
