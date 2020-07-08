@@ -1771,7 +1771,7 @@ df.groupby("key").transform(lambda x: x-x.mean())
 df.groupby("key").apply(lambda x: x-x.mean()) # 两个方法的输出结果一样，如下图
 ```
 
-[112]
+![pd112](python_pandas_pic/pd112.png)
 
 * apply 方法的另一个例子：
 
@@ -1782,9 +1782,7 @@ def norm_by_data2(x):
 df.groupby("key").apply(norm_by_data2) # 这一方法用transform就不行
 ```
 
-[113]
-
-
+![pd113](python_pandas_pic/pd113.png)
 
 ### 例：行星观测数据处理
 
@@ -1809,7 +1807,7 @@ planets.shape # (1035, 6)
 planets.head()
 ```
 
-[114]
+![pd114](python_pandas_pic/pd114.png)
 
 * 可以看出，该数据集包括行星发现的年份、质量、距离等信息。
 * 查看数据集的描述：
@@ -1818,7 +1816,7 @@ planets.head()
 planets.describe()
 ```
 
-[115]
+![pd115](python_pandas_pic/pd115.png)
 
 #### 任务
 
@@ -1855,7 +1853,7 @@ Name: decade, dtype: object
 planets.groupby(["method", decade]).sum()
 ```
 
-[116]
+![pd116](python_pandas_pic/pd116.png)
 
 * 现在我们单独把 number 拿出来，根据不同的 method、不同的 decade 来形成一个分组表。
   * 下面的语句我们单独讲解一下：
@@ -1868,7 +1866,7 @@ planets.groupby(["method", decade]).sum()
 planets.groupby(["method", decade])[["number"]].sum().unstack().fillna(0)
 ```
 
-[117]
+![pd117](python_pandas_pic/pd117.png)
 
 
 
@@ -1897,7 +1895,7 @@ titanic = sns.load_dataset("titanic", engine="python")
 titanic.head()
 ```
 
-[118]
+![pd118](python_pandas_pic/pd118.png)
 
 * 查看描述：
 
@@ -1905,7 +1903,7 @@ titanic.head()
 titanic.describe()
 ```
 
-[119]
+![pd119](python_pandas_pic/pd119.png)
 
 #### 统计
 
@@ -1915,7 +1913,7 @@ titanic.describe()
 titanic.groupby("sex")[["survived"]].mean()
 ```
 
-[120]
+![pd120](python_pandas_pic/pd120.png)
 
 * 分舱位进一步详细统计：
 
@@ -1923,7 +1921,7 @@ titanic.groupby("sex")[["survived"]].mean()
 titanic.groupby(["sex", "class"])["survived"].aggregate("mean").unstack()
 ```
 
-[121]
+![pd121](python_pandas_pic/pd121.png)
 
 #### 数据透视表的使用
 
@@ -1933,7 +1931,7 @@ titanic.groupby(["sex", "class"])["survived"].aggregate("mean").unstack()
 titanic.pivot_table("survived", index="sex", columns="class") # 默认aggfunc="mean"，可写可不写
 ```
 
-[122]
+![pd122](python_pandas_pic/pd122.png)
 
 * 如果需要展示总计结果，需要添加 margins 参数：
 
@@ -1941,7 +1939,7 @@ titanic.pivot_table("survived", index="sex", columns="class") # 默认aggfunc="m
 titanic.pivot_table("survived", index="sex", columns="class", aggfunc="mean", margins=True)
 ```
 
-[123]
+![pd123](python_pandas_pic/pd123.png)
 
 * 从 fare 和 survived 两个角度统计：
 
@@ -1949,7 +1947,7 @@ titanic.pivot_table("survived", index="sex", columns="class", aggfunc="mean", ma
 titanic.pivot_table(index="sex", columns="class", aggfunc={"survived": "sum", "fare": "mean"})
 ```
 
-[124]
+![pd124](python_pandas_pic/pd124.png)
 
 
 
@@ -1973,7 +1971,7 @@ data = pd.DataFrame(base_data, index=[["BeiJing","BeiJing","ShangHai","ShangHai"
 data
 ```
 
-[125]
+![pd125](python_pandas_pic/pd125.png)
 
 * 其实多级索引仅仅需要将索引转化为二维数组（列表）即可。
 * 添加索引名：
@@ -1983,7 +1981,114 @@ data.index.names = ["city", "year"]
 data
 ```
 
-[126]
+![pd126](python_pandas_pic/pd126.png)
+
+* 单取出 GDP：
+
+```python
+data[["GDP"]]
+```
+
+![pd127](python_pandas_pic/pd127.png)
+
+* 数据标量索引：
+
+```python
+data.loc["ShangHai", "GDP"]
+"""
+year
+2008    14070
+2018    32680
+Name: GDP, dtype: int32
+"""
+data.loc["ShangHai", 2018]["GDP"] # 32680
+```
 
 
 
+### 高性能 Pandas
+
+* Pandas 还提供了一些高性能运算函数，这里计算其中的两个：
+* 高性能函数存在的目的是当使用非常大的 DataFrame 进行运算时，该方法的计算效率更高，速度更快。
+  * 但是如果 DataFrame 的规模较小，可能结果并不如直接计算来的方便。
+
+#### eval()
+
+* **pd.eval(str)** 该函数需要填入一个复合代数式的字符串形式。该函数的意义是计算该代数式并返回结果。
+* 方法1：直接计算
+
+```python
+df1, df2, df3, df4 = (pd.DataFrame(np.random.random((10000,100))) for i in range(4))
+# 方法1：
+res = (df1 + df2) / (df3 + df4)
+res.head() # 输出如下图
+%timeit (df1 + df2) / (df3 + df4)
+# 13.9 ms ± 1.5 ms per loop (mean ± std. dev. of 7 runs, 100 loops each)
+```
+
+![pd128](python_pandas_pic/pd128.png)
+
+* 方法2：eval() 函数
+
+```python
+res = pd.eval("(df1 + df2) / (df3 + df4)")
+res.head() # 输出如下图
+%timeit pd.eval("(df1 + df2) / (df3 + df4)")
+# 9.82 ms ± 1e+03 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
+```
+
+![pd128](python_pandas_pic/pd128.png)
+
+* 检验两者是否相同：
+
+```python
+np.allclose((df1 + df2) / (df3 + df4), pd.eval("(df1 + df2) / (df3 + df4)"))
+# True
+```
+
+#### query()
+
+* **df.query(str)** 该方法需要填入一个数据筛选式。
+* 方法1：直接筛选
+
+```python
+df = pd.DataFrame(np.random.random((1000, 3)), columns=list("ABC"))
+# 方法1：
+res = df[(df.A < 0.5) & (df.B > 0.5)]
+res.head() # 输出如下图
+%timeit df[(df.A < 0.5) & (df.B > 0.5)]
+# 893 µs ± 81 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
+```
+
+![pd129](python_pandas_pic/pd129.png)
+
+* 方法2：query() 函数
+
+```python
+res = df.query("(A < 0.5) & (B > 0.5)")
+res.head() # 输出如下图
+%timeit df.query("(A < 0.5) & (B > 0.5)")
+# 2.08 ms ± 194 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
+```
+
+![pd129](python_pandas_pic/pd129.png)
+
+* 检验两者是否相同：
+
+```python
+np.allclose(df[(df.A < 0.5) & (df.B > 0.5)], df.query("(A < 0.5) & (B > 0.5)"))
+# True
+```
+
+#### 调用时机
+
+* 从上述两个方法使用来说，可以看出：
+  * 小数组时，普通方法反而更快。
+  * 大数组时，应考虑使用高性能方法。
+
+
+
+* 其他内容请自行查阅帮助文档。
+* Written by：Sirius. Lu
+* Reference：深度之眼  python基础训练营
+* 2020.7.8
